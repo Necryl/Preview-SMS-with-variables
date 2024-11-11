@@ -5,38 +5,70 @@
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+* {
+  margin: 0%;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+#input textarea {
+  width: 40em;
+  height: 10em;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+#result {
+  text-align: start;
+  display: grid;
+  gap: 2em;
+  justify-self: center;
 }
 
-.card {
-  padding: 2em;
+#result p {
+  width: auto;
+  max-width: 40em;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
-.read-the-docs {
-  color: #888;
+.instance {
+  display: grid;
+  grid-template-columns: auto auto;
+  border: 2px solid grey;
+  border-radius: 1em;
+  padding: 1em;
+}
+
+.instance > h3 {
+  text-align: start;
+}
+
+.instance > button {
+  width: max-content;
+  justify-self: end;
+}
+
+.vars {
+  display: grid;
+  gap: 0.5em;
+}
+
+.var {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 1em;
+  align-items: center;
+}
+
+#board {
+  display: grid;
+  gap: 1em;
+}
+
+#instances {
+  display: grid;
+  gap: 1em;
+  user-select: none;
+}
+
+#App {
+  display: grid;
+  gap: 1em;
 }
