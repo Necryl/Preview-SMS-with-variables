@@ -14,6 +14,16 @@
   height: 10em;
 }
 
+#input {
+  display: grid;
+  gap: 0.5em;
+}
+
+#input > span {
+  justify-self: center;
+  padding-bottom: 1em;
+}
+
 #result {
   text-align: start;
   display: grid;
@@ -71,4 +81,15 @@
 #App {
   display: grid;
   gap: 1em;
+}
+
+.instanceMenu {
+  gap: 1em;
+  display: flex;
+  justify-content: space-between;
+}
+
+.copyBtn:active {
+  background-color: white;
+  color: black;
 }

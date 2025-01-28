@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Instance from "./Instance.jsx";
 import "./App.css";
 
@@ -58,6 +58,27 @@ function App() {
     };
   }
 
+  function copyToClipboard(text) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log("Text copied to clipboard:", text);
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+      });
+  }
+
+  function replacePlaceholders(text, values) {
+    let index = 0; // To keep track of the array index
+
+    // Replace each "{#var#}" with the next value in the array, if available
+    return text.replace(/{#var#}/g, () => values[index++] || "");
+  }
+  const resultText = Object.keys(variableValues).map((instance) =>
+    replacePlaceholders(input, variableValues[instance].data)
+  );
+
   return (
     <div id="App">
       <div id="input">
@@ -67,58 +88,69 @@ function App() {
           value={input}
           placeholder="Paste SMS here with variables as {#var#}"
         ></textarea>
+        <span>{`${input.length} char${input.length > 0 ? "s" : ""}`}</span>
       </div>
       <div id="instances">
-        <div id="instanceMenu">
-          <button
-            onClick={() => {
-              createNewInstance();
-            }}
-          >
-            Add
-          </button>
-        </div>
-        <div id="board">
-          {Object.keys(variableValues).map((instance, i) => (
-            <Instance
-              data={variableValues[instance].data}
-              name={variableValues[instance].id}
-              index={i}
-              key={variableValues[instance].id}
-              onVarChange={(vars) => {
-                onVarChange(variableValues[instance].id, vars);
-              }}
-              deleteInstance={() => {
-                deleteInstance(variableValues[instance].id);
-              }}
-            />
-          ))}
-        </div>
+        {(() => {
+          const menu = (
+            <div className="instanceMenu">
+              <button
+                className="copyBtn"
+                onClick={() => {
+                  const text = resultText.join("\n\n");
+                  copyToClipboard(text);
+                }}
+              >
+                Copy Result
+              </button>
+              <button
+                className="addBtn"
+                onClick={() => {
+                  createNewInstance();
+                }}
+              >
+                Add
+              </button>
+            </div>
+          );
+
+          return (
+            <>
+              {menu}
+
+              <div id="board">
+                {Object.keys(variableValues).map((instance, i) => (
+                  <Instance
+                    data={variableValues[instance].data}
+                    name={variableValues[instance].id}
+                    index={i}
+                    key={variableValues[instance].id}
+                    onVarChange={(vars) => {
+                      onVarChange(variableValues[instance].id, vars);
+                    }}
+                    deleteInstance={() => {
+                      deleteInstance(variableValues[instance].id);
+                    }}
+                  />
+                ))}
+              </div>
+              {menu}
+            </>
+          );
+        })()}
       </div>
       <div id="result">
-        {(() => {
-          function replacePlaceholders(text, values) {
-            let index = 0; // To keep track of the array index
-
-            // Replace each "{#var#}" with the next value in the array, if available
-            return text.replace(/{#var#}/g, () => values[index++] || "");
-          }
-          return Object.keys(variableValues).map((instance) => {
-            let text = replacePlaceholders(
-              input,
-              variableValues[instance].data
-            );
-            return (
-              <p>
-                {text.split("\n").map((text) => (
-                  <>
-                    {text} <br />
-                  </>
-                ))}
-              </p>
-            );
-          });
-        })()}
+        {resultText.map((text, index) => {
+          return (
+            <p key={index}>
+              {text.split("\n").map((text, i) => (
+                <React.Fragment key={i}>
+                  {text} <br />
+                </React.Fragment>
+              ))}
+            </p>
+          );
+        })}
       </div>
     </div>
   );
