@@ -42,6 +42,7 @@ function App() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
+      console.log("checking, yes checking");
       const matches = (input.match(/{#var#}/g) || []).length;
       setVariableCount(matches);
     }, 300); // Adjust delay as needed (300ms here)
@@ -76,19 +77,53 @@ function App() {
     return text.replace(/{#var#}/g, () => values[index++] || "");
   }
   const resultText = Object.keys(variableValues).map((instance) =>
-    replacePlaceholders(input, variableValues[instance].data)
+    replacePlaceholders(input, variableValues[instance].data),
   );
+
+  const textareaRef = useRef(null);
+
+  const handleInsertVariable = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const variable = "{#var#}";
+
+    // If there's a selection, replace it; otherwise insert at cursor
+    let newText = "Error: this text should be the new text, update it!";
+    if (start !== end) {
+      // Replace selected text
+      newText = text.substring(0, start) + variable + text.substring(end);
+    } else {
+      // Insert at cursor position
+      newText = text.substring(0, start) + variable + text.substring(start);
+      // Move cursor to after the inserted variable
+      // textarea.selectionStart = textarea.selectionEnd = start + variable.length;
+    }
+    setInput(newText);
+
+    // Trigger the onChange event manually if you're using a controlled component
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    // Keep focus on textarea
+    textarea.focus();
+  };
 
   return (
     <div id="App">
       <div id="input">
         <textarea
           id="inputElem"
+          ref={textareaRef}
           onChange={handleSMSinput}
           value={input}
           placeholder="Paste SMS here with variables as {#var#}"
         ></textarea>
-        <span>{`${input.length} char${input.length > 0 ? "s" : ""}`}</span>
+        <div className="textareaExtras">
+          <span>{`${input.length} char${input.length > 0 ? "s" : ""}`}</span>
+          <button onClick={handleInsertVariable}>Variable</button>
+        </div>
       </div>
       <div id="instances">
         {(() => {
@@ -128,6 +163,7 @@ function App() {
                     onVarChange={(vars) => {
                       onVarChange(variableValues[instance].id, vars);
                     }}
+                    copyFunc={copyToClipboard}
                     deleteInstance={() => {
                       deleteInstance(variableValues[instance].id);
                     }}

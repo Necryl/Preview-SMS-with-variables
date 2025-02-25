@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function Instance({ data, index, onVarChange, deleteInstance }) {
+function Instance({ data, index, onVarChange, deleteInstance, copyFunc }) {
   const [vars, setVars] = useState([...data]);
 
   useEffect(() => {
@@ -23,20 +23,29 @@ function Instance({ data, index, onVarChange, deleteInstance }) {
         {vars.map((value, i) => {
           return (
             <div className="var" key={"var" + i}>
-              <h3>{"Variable " + (i + 1) + ":"}</h3>
-              <input
-                type="text"
-                value={value}
-                index={i}
-                onChange={(e) => {
-                  let result = [...vars];
-                  result[e.target.getAttribute("index")] = e.target.value;
-                  setVars(result);
+              <label
+                onClick={() => {
+                  copyFunc(value);
                 }}
-              />
-              <span className="charCount">
-                {value.length} {value.length < 2 ? "char" : "chars"}
-              </span>
+              >
+                {"Variable " + (i + 1) + ":"}
+                <input
+                  type="text"
+                  value={value}
+                  index={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onChange={(e) => {
+                    let result = [...vars];
+                    result[e.target.getAttribute("index")] = e.target.value;
+                    setVars(result);
+                  }}
+                />
+                <span className="charCount">
+                  {value.length} {value.length < 2 ? "char" : "chars"}
+                </span>
+              </label>
             </div>
           );
         })}
