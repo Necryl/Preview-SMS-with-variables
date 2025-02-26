@@ -23,22 +23,19 @@ function Page({ dataId, setTitle, title }) {
   }
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const newData = loadData();
-      if (newData) {
-        setInput(newData.input);
-        setVariableCount(newData.variableCount);
-        setVariableValues(newData.variableValues);
-        instanceCounter.current = newData.instanceCounter;
-      } else {
-        setInput("");
-        setVariableCount(0);
-        setVariableValues({});
-        instanceCounter.current = 0;
-      }
-    }, 300); // Adjust delay as needed (300ms here)
-
-    return () => clearTimeout(timeoutId); // Clear timeout if input changes within delay
+    const newData = loadData();
+    if (newData) {
+      console.log("Setting this:", JSON.stringify(newData));
+      setInput(newData.input);
+      setVariableCount(newData.variableCount);
+      setVariableValues(newData.variableValues);
+      instanceCounter.current = newData.instanceCounter;
+    } else {
+      setInput("");
+      setVariableCount(0);
+      setVariableValues({});
+      instanceCounter.current = 0;
+    }
   }, [dataId]);
 
   function saveData() {
@@ -77,8 +74,9 @@ function Page({ dataId, setTitle, title }) {
       const result = {
         ...prevState,
       };
-
-      result[id].data = vars;
+      if (result[id]) {
+        result[id].data = vars;
+      }
 
       return result;
     });
@@ -101,7 +99,7 @@ function Page({ dataId, setTitle, title }) {
   }, [input]);
 
   function generateInstance(varCount, data = []) {
-    const id = "Instance" + instanceCounter.current;
+    const id = "T" + dataId + "I" + instanceCounter.current;
     instanceCounter.current++;
     return {
       id: id,
@@ -220,7 +218,8 @@ function Page({ dataId, setTitle, title }) {
                     data={variableValues[instance].data}
                     name={variableValues[instance].id}
                     index={i}
-                    key={variableValues[instance].id}
+                    // key={variableValues[instance].id}
+                    key={`${dataId}${variableValues[instance].id}`}
                     onVarChange={(vars) => {
                       onVarChange(variableValues[instance].id, vars);
                     }}

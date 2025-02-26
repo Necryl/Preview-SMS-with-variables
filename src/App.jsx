@@ -119,6 +119,7 @@ function App() {
       }
       delete result[id];
       localStorage.removeItem(id);
+
       return result;
     });
   }
