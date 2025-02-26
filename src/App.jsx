@@ -12,6 +12,7 @@ const Nav = styled.div`
   border-bottom: 3px solid #353c47;
   .tab {
     display: flex;
+    position: relative;
     align-items: center;
     justify-content: center;
     flex: 1;
@@ -20,6 +21,30 @@ const Nav = styled.div`
     padding: 0em 0.3em;
     --bRad: 0.5em;
     border-radius: var(--bRad) var(--bRad) 0em 0em;
+  }
+  .tab span {
+    position: absolute;
+    right: 0.5em;
+    margin-left: 0.5em;
+    font-size: 0.8em;
+    aspect-ratio: 1;
+    height: 1em;
+    width: 1em;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6em;
+    align-self: center;
+    margin: 0em;
+    opacity: 0;
+    background-color: #353c47;
+  }
+  .tab:hover span {
+    opacity: 1;
+  }
+  .tab span:hover {
+    background-color: #ff4d4d;
   }
   .addTabBtn {
     display: flex;
@@ -38,25 +63,59 @@ const Nav = styled.div`
 `;
 
 function App() {
-  const [tabCount, setTabCount] = useState(1);
+  const [tabs, setTabs] = useState({});
+  const [currentTab, setCurrentTab] = useState(0);
+  function createTab() {
+    const result = structuredClone(tabs);
+    const keys = Object.keys(tabs);
+    const id = Number(keys.length) > 0 ? Number(keys[keys.length - 1]) + 1 : 1;
+    result[id] = { title: `SMS ${id}` };
+    setTabs(result);
+    setCurrentTab(id);
+  }
+  if (Object.keys(tabs).length === 0) {
+    createTab();
+  }
+  function removeTab(id) {
+    const result = structuredClone(tabs);
+    delete result[id];
+    setTabs(result);
+  }
+  function setTitle(id, title) {
+    const result = structuredClone(tabs);
+    result[id].title = title;
+    setTabs(result);
+  }
   return (
     <div id="App">
       <Nav>
-        {[...Array(tabCount)].map((_, i) => (
+        {Object.keys(tabs).map((key, i) => (
           <button className="tab" key={i}>
-            Page {i + 1}
+            {tabs[key].title}{" "}
+            <span
+              onClick={() => {
+                removeTab(key);
+              }}
+            >
+              x
+            </span>
           </button>
         ))}
         <button
           className="addTabBtn"
           onClick={() => {
-            setTabCount((prev) => prev + 1);
+            createTab();
           }}
         >
           +
         </button>
       </Nav>
-      <Page />
+      <Page
+        data-id={currentTab}
+        setTitle={(title) => {
+          setTitle(currentTab, title);
+        }}
+      />
     </div>
   );
 }
