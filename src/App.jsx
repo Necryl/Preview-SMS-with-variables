@@ -64,7 +64,7 @@ const Nav = styled.div`
 
 function App() {
   const [tabs, setTabs] = useState({});
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState(null);
   function createTab() {
     const result = structuredClone(tabs);
     const keys = Object.keys(tabs);
@@ -77,9 +77,21 @@ function App() {
     createTab();
   }
   function removeTab(id) {
-    const result = structuredClone(tabs);
-    delete result[id];
-    setTabs(result);
+    setTabs((prev) => {
+      const result = structuredClone(prev);
+      if (Number(currentTab) === Number(id) && Object.keys(result).length > 1) {
+        const keys = Object.keys(result);
+        let nextTab = null;
+        if (keys.indexOf(id.toString()) == keys.length - 1) {
+          nextTab = keys[keys.length - 2];
+        } else {
+          nextTab = keys[keys.indexOf(id.toString()) + 1];
+        }
+        setCurrentTab(Number(nextTab));
+      }
+      delete result[id];
+      return result;
+    });
   }
   function setTitle(id, title) {
     const result = structuredClone(tabs);
@@ -90,10 +102,11 @@ function App() {
     <div id="App">
       <Nav>
         {Object.keys(tabs).map((key, i) => (
-          <button className="tab" key={i}>
+          <button className="tab" onClick={() => setCurrentTab(key)} key={i}>
             {tabs[key].title}{" "}
             <span
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 removeTab(key);
               }}
             >
@@ -111,10 +124,11 @@ function App() {
         </button>
       </Nav>
       <Page
-        data-id={currentTab}
+        dataId={currentTab}
         setTitle={(title) => {
           setTitle(currentTab, title);
         }}
+        title={tabs[currentTab] ? tabs[currentTab].title : "loading..."}
       />
     </div>
   );

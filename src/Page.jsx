@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Instance from "./Instance.jsx";
 import "./Page.css";
 
-function Page() {
+function Page({ dataId, setTitle, title }) {
   const [input, setInput] = useState("");
   const [variableCount, setVariableCount] = useState(0);
   const [variableValues, setVariableValues] = useState({});
@@ -42,7 +42,6 @@ function Page() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      console.log("checking, yes checking");
       const matches = (input.match(/{#var#}/g) || []).length;
       setVariableCount(matches);
     }, 300); // Adjust delay as needed (300ms here)
@@ -112,6 +111,15 @@ function Page() {
 
   return (
     <div id="Page">
+      <div id="title">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+          }}
+        />
+      </div>
       <div id="input">
         <textarea
           id="inputElem"
