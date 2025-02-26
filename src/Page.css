@@ -1,3 +1,10 @@
+#Page {
+    display: grid;
+    gap: 3em;
+    max-width: 1280px;
+    justify-content: center;
+}
+
 #input textarea {
     width: 40em;
     height: 10em;
@@ -89,11 +96,6 @@
     display: grid;
     gap: 1em;
     user-select: none;
-}
-
-#Page {
-    display: grid;
-    gap: 3em;
 }
 
 .instanceMenu {

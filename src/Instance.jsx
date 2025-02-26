@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 
 function Instance({ data, index, onVarChange, deleteInstance, copyFunc }) {
   const [vars, setVars] = useState([...data]);
@@ -7,7 +8,7 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc }) {
     const timeoutId = setTimeout(() => {}, 300); // Adjust delay as needed (300ms here)
     onVarChange(vars);
     return () => clearTimeout(timeoutId); // Clear timeout if input changes within delay
-  }, [vars]);
+  }, [vars, onVarChange]);
 
   return (
     <div className="instance">
@@ -32,13 +33,14 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc }) {
                 <input
                   type="text"
                   value={value}
-                  index={i}
+                  data-index={i}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
                   onChange={(e) => {
                     let result = [...vars];
-                    result[e.target.getAttribute("index")] = e.target.value;
+                    result[e.target.getAttribute("data-index")] =
+                      e.target.value;
                     setVars(result);
                   }}
                 />
@@ -53,5 +55,13 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc }) {
     </div>
   );
 }
+
+Instance.propTypes = {
+  data: PropTypes.array,
+  index: PropTypes.number,
+  onVarChange: PropTypes.func,
+  deleteInstance: PropTypes.func,
+  copyFunc: PropTypes.func,
+};
 
 export default Instance;
