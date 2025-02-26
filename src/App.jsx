@@ -2,6 +2,7 @@ import Page from "./Page";
 import "./App.css";
 import styled from "styled-components";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const Nav = styled.div`
   display: flex;
@@ -63,8 +64,35 @@ const Nav = styled.div`
 `;
 
 function App() {
-  const [tabs, setTabs] = useState({});
-  const [currentTab, setCurrentTab] = useState(null);
+  const loadedTabs = loadTabs();
+  const [tabs, setTabs] = useState(loadedTabs ? loadedTabs.list : {});
+  const [currentTab, setCurrentTab] = useState(
+    loadedTabs ? loadedTabs.current : 0,
+  );
+
+  function loadTabs() {
+    const savedTabs = {
+      list: JSON.parse(localStorage.getItem("tabs")),
+      current: JSON.parse(localStorage.getItem("currentTab")),
+    };
+
+    if (savedTabs.list && savedTabs.current) {
+      return savedTabs;
+    }
+  }
+
+  function saveTabs() {
+    localStorage.setItem("tabs", JSON.stringify(tabs));
+    localStorage.setItem("currentTab", JSON.stringify(currentTab));
+  }
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      saveTabs();
+    }, 100); // Adjust delay as needed (300ms here)
+
+    return () => clearTimeout(timeoutId); // Clear timeout if input changes within delay
+  }, [tabs, currentTab]);
+
   function createTab() {
     const result = structuredClone(tabs);
     const keys = Object.keys(tabs);
@@ -100,6 +128,15 @@ function App() {
   }
   return (
     <div id="App">
+      <button
+        id="reset"
+        onClick={() => {
+          localStorage.clear();
+          location.reload();
+        }}
+      >
+        Reset
+      </button>
       <Nav>
         {Object.keys(tabs).map((key, i) => (
           <button className="tab" onClick={() => setCurrentTab(key)} key={i}>
@@ -124,7 +161,7 @@ function App() {
         </button>
       </Nav>
       <Page
-        dataId={currentTab}
+        dataId={Number(currentTab)}
         setTitle={(title) => {
           setTitle(currentTab, title);
         }}

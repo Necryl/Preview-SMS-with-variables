@@ -14,3 +14,12 @@
     display: grid;
     gap: 2em;
 }
+
+#reset {
+    justify-self: end;
+    padding: 0.2em 0.7em;
+}
+
+#reset:hover {
+    background-color: red;
+}

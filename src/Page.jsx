@@ -1,14 +1,60 @@
 import React, { useState, useRef, useEffect } from "react";
 import Instance from "./Instance.jsx";
 import "./Page.css";
+import PropTypes from "prop-types";
 
 function Page({ dataId, setTitle, title }) {
-  const [input, setInput] = useState("");
-  const [variableCount, setVariableCount] = useState(0);
-  const [variableValues, setVariableValues] = useState({});
-  const instanceCounter = useRef(0);
+  const dataLoaded = loadData();
+  const [input, setInput] = useState(dataLoaded ? dataLoaded.input : "");
+  const [variableCount, setVariableCount] = useState(
+    dataLoaded ? dataLoaded.variableCount : 0,
+  );
+  const [variableValues, setVariableValues] = useState(
+    dataLoaded ? dataLoaded.variableValues : {},
+  );
+  const instanceCounter = useRef(dataLoaded ? dataLoaded.instanceCounter : 0);
+
+  function loadData() {
+    const data = localStorage.getItem(dataId);
+    if (data) {
+      const parsedData = JSON.parse(data);
+      return parsedData;
+    }
+  }
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const newData = loadData();
+      if (newData) {
+        setInput(newData.input);
+        setVariableCount(newData.variableCount);
+        setVariableValues(newData.variableValues);
+        instanceCounter.current = newData.instanceCounter;
+      }
+    }, 300); // Adjust delay as needed (300ms here)
+
+    return () => clearTimeout(timeoutId); // Clear timeout if input changes within delay
+  }, [dataId]);
+
+  function saveData() {
+    const data = {
+      input,
+      variableCount,
+      variableValues,
+      instanceCounter: instanceCounter.current,
+    };
+    localStorage.setItem(dataId, JSON.stringify(data));
+  }
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      saveData();
+    }, 300); // Adjust delay as needed (300ms here)
+
+    return () => clearTimeout(timeoutId); // Clear timeout if input changes within delay
+  }, [input, variableCount, variableValues, instanceCounter.current]);
 
   if (Object.keys(variableValues).length === 0 && variableCount > 0) {
+    console.log("creating new instance if statement");
     createNewInstance();
   }
   function deleteInstance(id) {
@@ -111,15 +157,17 @@ function Page({ dataId, setTitle, title }) {
 
   return (
     <div id="Page">
-      <div id="title">
+      <label id="title" className="copy" onClick={() => copyToClipboard(title)}>
+        Title:
         <input
           type="text"
           value={title}
+          onClick={(e) => e.stopPropagation()}
           onChange={(e) => {
             setTitle(e.target.value);
           }}
         />
-      </div>
+      </label>
       <div id="input">
         <textarea
           id="inputElem"
@@ -199,5 +247,11 @@ function Page({ dataId, setTitle, title }) {
     </div>
   );
 }
+
+Page.propTypes = {
+  dataId: PropTypes.number,
+  setTitle: PropTypes.func,
+  title: PropTypes.string,
+};
 
 export default Page;

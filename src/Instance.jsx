@@ -8,7 +8,7 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc }) {
     const timeoutId = setTimeout(() => {}, 300); // Adjust delay as needed (300ms here)
     onVarChange(vars);
     return () => clearTimeout(timeoutId); // Clear timeout if input changes within delay
-  }, [vars, onVarChange]);
+  }, [vars]);
 
   return (
     <div className="instance">
@@ -25,6 +25,7 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc }) {
           return (
             <div className="var" key={"var" + i}>
               <label
+                className="copy"
                 onClick={() => {
                   copyFunc(value);
                 }}
