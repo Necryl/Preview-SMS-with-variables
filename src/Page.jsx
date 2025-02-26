@@ -30,6 +30,11 @@ function Page({ dataId, setTitle, title }) {
         setVariableCount(newData.variableCount);
         setVariableValues(newData.variableValues);
         instanceCounter.current = newData.instanceCounter;
+      } else {
+        setInput("");
+        setVariableCount(0);
+        setVariableValues({});
+        instanceCounter.current = 0;
       }
     }, 300); // Adjust delay as needed (300ms here)
 
