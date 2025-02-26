@@ -159,94 +159,100 @@ function Page({ dataId, setTitle, title }) {
   };
 
   return (
-    <div id="Page">
-      <label id="title" className="copy" onClick={() => copyToClipboard(title)}>
-        Title:
-        <input
-          type="text"
-          value={title}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => {
-            setTitle(e.target.value);
-          }}
-        />
-      </label>
-      <div id="input">
-        <textarea
-          id="inputElem"
-          ref={textareaRef}
-          onChange={handleSMSinput}
-          value={input}
-          placeholder="Paste SMS here with variables as {#var#}"
-        ></textarea>
-        <div className="textareaExtras">
-          <span>{`${input.length} char${input.length > 0 ? "s" : ""}`}</span>
-          <button onClick={handleInsertVariable}>Variable</button>
+    <div id="pageWrapper">
+      <div id="Page">
+        <label
+          id="title"
+          className="copy"
+          onClick={() => copyToClipboard(title)}
+        >
+          Title:
+          <input
+            type="text"
+            value={title}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              setTitle(e.target.value);
+            }}
+          />
+        </label>
+        <div id="input">
+          <textarea
+            id="inputElem"
+            ref={textareaRef}
+            onChange={handleSMSinput}
+            value={input}
+            placeholder="Paste SMS here with variables as {#var#}"
+          ></textarea>
+          <div className="textareaExtras">
+            <span>{`${input.length} char${input.length > 0 ? "s" : ""}`}</span>
+            <button onClick={handleInsertVariable}>Variable</button>
+          </div>
         </div>
-      </div>
-      <div id="instances">
-        {(() => {
-          const menu = (
-            <div className="instanceMenu">
-              <button
-                className="copyBtn"
-                onClick={() => {
-                  const text = resultText.join("\n\n");
-                  copyToClipboard(text);
-                }}
-              >
-                Copy Result
-              </button>
-              <button
-                className="addBtn"
-                onClick={() => {
-                  createNewInstance();
-                }}
-              >
-                Add
-              </button>
-            </div>
-          );
-
-          return (
-            <>
-              {menu}
-
-              <div id="board">
-                {Object.keys(variableValues).map((instance, i) => (
-                  <Instance
-                    data={variableValues[instance].data}
-                    name={variableValues[instance].id}
-                    index={i}
-                    // key={variableValues[instance].id}
-                    key={`${dataId}${variableValues[instance].id}`}
-                    onVarChange={(vars) => {
-                      onVarChange(variableValues[instance].id, vars);
-                    }}
-                    copyFunc={copyToClipboard}
-                    deleteInstance={() => {
-                      deleteInstance(variableValues[instance].id);
-                    }}
-                  />
-                ))}
+        <div id="instances">
+          {(() => {
+            const menu = (
+              <div className="instanceMenu">
+                <button
+                  className="copyBtn"
+                  onClick={() => {
+                    const text = resultText.join("\n\n");
+                    copyToClipboard(text);
+                  }}
+                >
+                  Copy Result
+                </button>
+                <button
+                  className="addBtn"
+                  onClick={() => {
+                    createNewInstance();
+                  }}
+                >
+                  Add
+                </button>
               </div>
-              {menu}
-            </>
-          );
-        })()}
-      </div>
-      <div id="result">
-        {resultText.map((text, index) => {
-          return (
-            <p key={index}>
-              {text.split("\n").map((text, i) => (
-                <React.Fragment key={i}>
-                  {text} <br />
-                </React.Fragment>
-              ))}
-            </p>
-          );
-        })}
+            );
+
+            return (
+              <>
+                {menu}
+
+                <div id="board">
+                  {Object.keys(variableValues).map((instance, i) => (
+                    <Instance
+                      data={variableValues[instance].data}
+                      name={variableValues[instance].id}
+                      index={i}
+                      // key={variableValues[instance].id}
+                      key={`${dataId}${variableValues[instance].id}`}
+                      onVarChange={(vars) => {
+                        onVarChange(variableValues[instance].id, vars);
+                      }}
+                      copyFunc={copyToClipboard}
+                      deleteInstance={() => {
+                        deleteInstance(variableValues[instance].id);
+                      }}
+                    />
+                  ))}
+                </div>
+                {menu}
+              </>
+            );
+          })()}
+        </div>
+        <div id="result">
+          {resultText.map((text, index) => {
+            return (
+              <p key={index}>
+                {text.split("\n").map((text, i) => (
+                  <React.Fragment key={i}>
+                    {text} <br />
+                  </React.Fragment>
+                ))}
+              </p>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

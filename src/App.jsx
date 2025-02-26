@@ -8,6 +8,7 @@ const Nav = styled.div`
   display: flex;
   flex-wrap: wrap;
   min-height: 2em;
+  height: max-content;
   width: 100%;
   gap: 0.2em;
   border-bottom: 3px solid #353c47;
@@ -139,7 +140,7 @@ function App() {
       >
         Reset
       </button>
-      <Nav>
+      <Nav id="nav">
         {Object.keys(tabs).map((key, i) => (
           <button className="tab" onClick={() => setCurrentTab(key)} key={i}>
             {tabs[key].title}{" "}

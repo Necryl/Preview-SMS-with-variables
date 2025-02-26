@@ -1,8 +1,14 @@
+#pageWrapper {
+    display: grid;
+    width: 100%;
+    overflow-y: scroll;
+}
 #Page {
     display: grid;
     gap: 3em;
     max-width: 1280px;
-    justify-content: center;
+    justify-self: center;
+    align-content: start;
 }
 
 #Page #title {
