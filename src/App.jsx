@@ -118,6 +118,7 @@ function App() {
         setCurrentTab(Number(nextTab));
       }
       delete result[id];
+      localStorage.removeItem(id);
       return result;
     });
   }
