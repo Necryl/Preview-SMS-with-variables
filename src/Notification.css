@@ -1,0 +1,98 @@
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    /* Stack downwards: Newest at top, Oldest at bottom */
+    gap: 10px;
+    z-index: 1000;
+    pointer-events: none;
+    /* Allow clicking through */
+}
+
+.notification {
+    background: rgba(26, 27, 38, 0.95);
+    /* Tokyo Night background */
+    border: 1px solid var(--primary);
+    /* Default fallback */
+    /* Neon border */
+    color: var(--fg);
+    padding: 12px 24px;
+    border-radius: 8px;
+    max-width: 300px;
+    max-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9em;
+    pointer-events: auto;
+
+    /* Animation */
+    animation: slideUpFadeIn 0.3s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+
+    /* Default target opacity */
+    --target-opacity: 1;
+}
+
+/* Style for the second (and subsequent) notifications */
+.notification:nth-child(n+2) {
+    --target-opacity: 0.6;
+}
+
+.notification.risk-positive {
+    border-color: var(--risk-positive);
+    color: var(--risk-positive);
+}
+
+.notification.risk-medium {
+    border-color: var(--risk-medium);
+    color: var(--risk-medium);
+}
+
+.notification.risk-high {
+    border-color: var(--risk-high);
+    color: var(--risk-high);
+}
+
+.notification.risk-low {
+    border-color: var(--risk-low);
+    color: var(--risk-low);
+}
+
+.notification.fading-out {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+.notification-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+}
+
+@keyframes slideUpFadeIn {
+    to {
+        opacity: var(--target-opacity);
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}

@@ -1,145 +1,688 @@
-#pageWrapper {
-    display: grid;
-    width: 100%;
-    overflow-y: scroll;
-}
 #Page {
     display: grid;
-    gap: 3em;
-    max-width: 1280px;
-    justify-self: center;
-    align-content: start;
+    grid-template-columns: 1fr 2fr;
+    gap: 2em;
+    width: 100%;
+    padding: 1em;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
 }
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    height: 100%;
+    overflow-y: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    box-sizing: border-box;
+}
+
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    height: 100%;
+    min-height: 0;
+}
+
 
 #Page #title {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 1em;
-    border-bottom: 1px solid transparent;
-    padding: 0em 0.5em;
+    padding: 0.5em;
+    align-items: center;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    flex-shrink: 0;
+    /* Don't shrink title */
 }
 
 #Page #title input {
-    background: inherit;
+    background: transparent;
     border: none;
-    border-bottom: 1px solid transparent;
-    color: inherit;
+    color: var(--primary);
+    font-size: 1.2em;
+    font-weight: bold;
+    width: 100%;
+    padding: 0.2em;
+}
 
-    font-size: 1em;
-    transition: 0.1s;
-}
-#Page #title input:is(:hover, :focus, :active) {
-    border-bottom-color: white;
-}
-#Page #title input:is(:focus, :active) {
-    border: none;
+#Page #title input:focus {
     outline: none;
-    border-bottom: 1px solid;
+    border-bottom: 1px solid var(--primary);
 }
 
-#input textarea {
-    width: 40em;
-    height: 10em;
+/* Meta Fields (Template ID & Contact) */
+.meta-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    margin-bottom: 0;
+    /* Remove bottom margin as we use padding in parent */
+    background: var(--panel-bg);
+    padding: 1.5em;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    flex-grow: 1;
+    /* Take up remaining space */
+    min-height: 0;
+    /* Allow flex item to shrink below content size */
+    overflow: hidden;
+    /* Container for scrollable content */
+}
+
+.meta-fields label {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5em;
+    font-size: 0.9em;
+    color: var(--fg-dark);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+}
+
+.meta-fields label.notes-label {
+    flex-grow: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-fields input,
+.meta-fields textarea {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.8em;
+    color: var(--fg);
+    font-size: 1em;
+    width: 100%;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.meta-fields textarea {
+    resize: none;
+    /* Disable manual resize as it fills the space */
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Scroll internally */
+    /* Scroll internally */
+    flex: 1;
+    /* Fill the label container */
+}
+
+/* Custom Resize Handle for all textareas */
+textarea::-webkit-scrollbar-corner {
+    background-color: var(--input-bg);
+}
+
+textarea::-webkit-resizer {
+    background-color: var(--input-bg);
+    background-image: radial-gradient(circle, var(--fg-dark) 40%, transparent 40%);
+    background-position: bottom 4px right 4px;
+    background-size: 8px 8px;
+    background-repeat: no-repeat;
+}
+
+.meta-fields input:focus,
+.meta-fields textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
 }
 
 #input {
     display: grid;
     gap: 0.5em;
-    justify-items: center;
+}
+
+.textarea-wrapper {
+    position: relative;
+    display: grid;
+}
+
+#input textarea {
+    width: 100%;
+    min-height: 150px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1em;
+    color: var(--fg);
+    font-family: 'Inter', monospace;
+    font-size: 1em;
+    resize: none;
+}
+
+/* Add space at the bottom of the scrollbar to avoid overlap with resize handle */
+#input textarea::-webkit-scrollbar-button:vertical:end:increment {
+    display: block;
+    height: 30px;
+    background-color: transparent;
+}
+
+#input textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+}
+
+.resize-handle {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    cursor: se-resize;
+    color: var(--fg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    z-index: 10;
+    pointer-events: auto;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.resize-handle:hover {
+    opacity: 1;
+    color: var(--primary);
 }
 
 #input .textareaExtras {
     display: flex;
     width: 100%;
     justify-content: space-between;
+    color: var(--fg-dark);
+    font-size: 0.9em;
+    align-items: center;
 }
 
-.textareaExtras button {
-    padding: 0.4em 1em;
+.right-header {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1em;
+    margin-bottom: 1em;
+    flex-shrink: 0;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.right-content-wrapper {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.right-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    padding-right: 0.5em;
+    height: 100%;
+}
+
+.right-content.no-scroll {
+    overflow-y: hidden;
+}
+
+.toggle-result-btn,
+.copyBtn,
+.addBtn {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 0.5em 1em;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.toggle-result-btn:hover,
+.copyBtn:hover,
+.addBtn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.addBtn.warn {
+    border-color: var(--risk-medium);
+    color: var(--risk-medium);
+}
+
+.addBtn.warn:hover {
+    background-color: rgba(224, 175, 104, 0.1);
+}
+
+#result-wrapper,
+#llm-wrapper {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background: transparent;
+}
+
+#result-wrapper.visible,
+#llm-wrapper.visible {
     display: grid;
+}
+
+#llm-wrapper {
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+#llm-view {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 2em;
+    box-sizing: border-box;
+}
+
+.llm-controls {
+    display: flex;
+    gap: 1em;
+    margin-bottom: 1em;
+    align-items: center;
+}
+
+.close-json-btn {
+    margin-left: auto;
+    /* Push to the right */
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg-dark);
+    font-size: 1.2em;
+    padding: 0.4em;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-json-btn:hover {
+    background-color: var(--terminal-red);
+    color: white;
+    border-color: var(--terminal-red);
+}
+
+#llm-view textarea {
+    flex-grow: 1;
+    width: 100%;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1em;
+    color: var(--fg);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    resize: none;
+    box-sizing: border-box;
+}
+
+#llm-view textarea:focus {
+    outline: none;
+    border-color: var(--primary);
 }
 
 #result {
     text-align: start;
     display: grid;
-    gap: 2em;
-    justify-self: center;
+    gap: 1.5em;
+    padding: 2em;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    place-content: start;
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 #result p {
-    width: auto;
-    max-width: 40em;
+    width: 100%;
     word-wrap: break-word;
-    white-space: normal;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    color: var(--fg);
 }
 
 .instance {
     display: grid;
-    grid-template-columns: auto auto;
-    border: 2px solid grey;
-    border-radius: 1em;
+    grid-template-columns: 1fr;
+    gap: 1em;
+    background: var(--bg-dark);
+    /* Changed from rgba(26, 27, 38, 0.6) */
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    /* Changed from var(--glass-border) */
+    border-radius: 0.5em;
+    /* Changed from 12px */
     padding: 1em;
+    /* Changed from 1.5em */
+    position: relative;
+    transition: all 0.2s;
+    /* Changed from transform 0.2s, border-color 0.2s */
 }
 
-.instance > h3 {
-    text-align: start;
+.instance:focus {
+    outline: none;
 }
 
-.instance > button {
-    width: max-content;
-    justify-self: end;
+.instance:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
 }
+
+.instance.selected {
+    border-color: var(--risk-medium);
+    box-shadow: 0 0 0 2px rgba(224, 175, 104, 0.4);
+    transform: translateY(-2px);
+}
+
+.instance>h3 {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 1.1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    cursor: default;
+    width: fit-content;
+}
+
+/* Tooltip styles removed - using Portal Tooltip component */
 
 .instance label {
-    display: flex;
-    grid-template-columns: auto 1fr auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
     gap: 1em;
-    padding: 0.3em;
+    align-items: center;
+    color: var(--fg-dark);
+}
+
+.instance input {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5em;
+    color: var(--fg);
 }
 
 .copy {
-    border-radius: 0.25em;
-    background-color: var(--bgCol);
-    color: var(--col);
-    --bgCol: inherit;
-    --col: inherit;
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
-.copy:active {
-    --bgCol: cyan;
-    --col: black;
+.copy:hover {
+    color: var(--primary);
 }
 
 .vars {
     display: grid;
-    gap: 0.5em;
+    gap: 0.8em;
 }
 
 .var {
     display: grid;
-    grid-auto-flow: column;
+    grid-template-columns: auto;
     gap: 1em;
     align-items: center;
 }
 
+.var label {
+    display: grid;
+    grid-template-columns: 6em 1fr auto;
+    gap: 0.3em;
+    align-items: center;
+}
+
+.var label span {
+    min-width: 5em;
+}
+
+.var input {
+    min-width: none;
+    width: 100%;
+}
+
+.instance-stats {
+    margin-top: 0.5em;
+    font-size: 0.9em;
+    color: var(--fg-dark);
+    text-align: right;
+    font-style: italic;
+}
+
 #board {
     display: grid;
-    gap: 1em;
+    gap: 1.5em;
 }
 
 #instances {
     display: grid;
-    gap: 1em;
-    user-select: none;
+    gap: 1.5em;
 }
 
 .instanceMenu {
     gap: 1em;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    margin-bottom: 1em;
 }
 
-.copyBtn:active {
-    background-color: white;
-    color: black;
+.delete-instance-btn {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    background: transparent;
+    border: none;
+    color: var(--fg-dark);
+    font-size: 1em;
+    cursor: pointer;
+    padding: 0.4em;
+    border-radius: 4px;
+    transition: all 0.2s;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.delete-instance-btn:hover {
+    color: #ff5555;
+    background: rgba(255, 85, 85, 0.1);
+}
+
+/* Flash Animation */
+@keyframes flash {
+    0% {
+        background-color: cyan;
+        color: #000;
+    }
+
+    100% {
+        background-color: var(--panel-bg);
+        color: inherit;
+    }
+}
+
+.flash-active {
+    animation: flash 0.4s ease-out;
+}
+
+/* Specific overrides */
+.copyBtn.flash-active,
+.toggle-result-btn.flash-active,
+.addBtn.flash-active {
+    animation-name: flash-button;
+}
+
+@keyframes flash-button {
+    0% {
+        background-color: cyan;
+        color: #000;
+        border-color: cyan;
+    }
+
+    100% {
+        background-color: var(--panel-bg);
+        color: var(--fg);
+        border-color: var(--border);
+    }
+}
+
+label.flash-active {
+    animation-name: flash-label;
+}
+
+@keyframes flash-label {
+    0% {
+        background-color: rgba(0, 255, 255, 0.2);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Copied Variable Highlight */
+.instance input.copied-warning {
+    border-color: var(--risk-medium);
+    box-shadow: 0 0 0 1px var(--risk-medium);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.instance input.copied-warning:focus {
+    border-color: var(--risk-medium);
+    box-shadow: 0 0 0 2px var(--risk-medium);
+}
+
+.instance-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.clear-instance-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg-dim);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.clear-instance-btn:hover {
+    background: var(--bg-hover);
+    color: var(--fg);
+    border-color: var(--fg-dim);
+}
+
+.delete-instance-btn {
+    /* Override absolute positioning since it's now in a flex container */
+    position: static !important;
+}
+
+.text-risk-high {
+    color: var(--risk-high) !important;
+    font-weight: bold;
+}
+
+@media (max-width: 900px) {
+    #Page {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+        gap: 1.5em;
+    }
+
+    .left-column,
+    .right-column {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .meta-fields {
+        overflow: visible;
+        height: auto;
+    }
+
+    .meta-fields textarea {
+        min-height: 100px;
+        /* Ensure some height since we removed flex grow constraint */
+    }
+
+    .right-content-wrapper {
+        height: auto;
+        overflow: visible;
+    }
+
+    .right-content {
+        overflow: visible;
+        height: auto;
+    }
+
+    /* Fix overlays for scrolling page */
+    #result-wrapper,
+    #llm-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    /* Adjust title input for smaller screens */
+    #Page #title {
+        grid-template-columns: auto 1fr;
+        /* Keep as is, but maybe adjust padding */
+    }
+
+}
+
+@media (max-width: 1240px) {
+    .right-header {
+        justify-content: space-between;
+    }
+
+    .right-header button {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
 }

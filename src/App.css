@@ -1,6 +1,6 @@
 #root {
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem 2rem;
     text-align: center;
     width: 100%;
     height: 100vh;
@@ -16,16 +16,295 @@
     grid-template-rows: auto auto 1fr;
     gap: 0.5em;
     height: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-#App #nav {
+/* ... (unchanged styles) ... */
+
+/* Migrated from App.jsx styled-components */
+#nav {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 2em;
+    height: max-content;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    /* Allow shrinking in grid */
+    gap: 0em;
+    border-bottom: 2px solid var(--border);
 }
 
-#reset {
-    justify-self: end;
-    padding: 0.2em 0.7em;
+.pin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--fg-dark);
+    cursor: pointer;
+    font-size: 1em;
+    /* Increased from 1.5em */
+    padding: 0 0.1em;
+    opacity: 0;
+    /* Hidden by default */
+    transition: opacity 0.2s, transform 0.2s;
+    width: 2.1em;
+    /* Increased from 1.8em */
+    /* Reserve space */
+}
+
+.pin-btn svg {
+    display: block;
+}
+
+.pin-btn.dummy {
+    visibility: hidden;
+    margin-right: 0;
+    margin-left: 0.1em;
+    pointer-events: none;
+}
+
+
+
+/* Pinned state: Always visible, Primary color */
+.tab.pinned .pin-btn {
+    opacity: 1;
+    color: var(--primary);
+}
+
+/* Unpinned state, Tab Hover: Visible but distinct (Gray/Dimmed) */
+.tab:not(.pinned):hover .pin-btn {
+    opacity: 0.5;
+    color: var(--fg-dark);
+}
+
+/* Hovering the button itself: Fully active */
+/* Hovering the button itself - Unpinned: Becomes bright but neutral (White) */
+.tab:not(.pinned) .pin-btn:hover {
+    opacity: 1 !important;
+    color: #ffffff !important;
+    /* Pure white for distinct contrast against blue */
+    transform: scale(1.1);
+}
+
+/* Hovering the button itself - Pinned: Stays Primary */
+.tab.pinned .pin-btn:hover {
+    opacity: 1 !important;
+    color: var(--primary) !important;
+    transform: scale(1.1);
+}
+
+/* Ensure unpinned, unhovered tabs have hidden pin button */
+.tab:not(:hover):not(.pinned) .pin-btn {
+    opacity: 0;
+}
+
+#reset,
+#settings {
+    padding: 0.4em 1em;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
 }
 
 #reset:hover {
-    background-color: red;
+    border-color: #ff5555;
+    color: #ff5555;
+    background: rgba(255, 85, 85, 0.1);
+}
+
+#settings:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5em 1em;
+    margin-bottom: 1em;
+}
+
+.app-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--primary);
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+/* Migrated from App.jsx styled-components */
+#nav {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 2em;
+    height: max-content;
+    width: 100%;
+    max-width: 100%;
+    gap: 0em;
+    border-bottom: 2px solid var(--border);
+}
+
+.tab {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    width: max-content;
+    max-width: 100%;
+    min-width: 9em;
+    padding: 0.2em 0.5em;
+    /* Symmetrical padding */
+    gap: 0.1em;
+    --bRad: 0.5em;
+    border-radius: var(--bRad) var(--bRad) 0em 0em;
+    background-color: var(--bg-dark);
+    color: var(--fg-dark);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    text-align: center;
+}
+
+.tab:hover {
+    background-color: var(--terminal-black);
+    color: var(--fg);
+}
+
+.tab.active {
+    border-bottom-color: var(--primary);
+    background-color: var(--terminal-black);
+    color: var(--fg);
+}
+
+.tab:focus {
+    outline: none;
+}
+
+.tab .close-tab-btn {
+    position: absolute;
+    right: 0.2em;
+    top: 0.2em;
+    font-size: 0.7em;
+    height: 1.2em;
+    width: 1.2em;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    background-color: var(--terminal-red);
+    color: var(--bg);
+    transition: opacity 0.2s;
+}
+
+.tab:hover .close-tab-btn {
+    opacity: 1;
+}
+
+
+
+.tab .close-tab-btn:hover {
+    background-color: #ff4d4d;
+    transform: scale(1.1);
+}
+
+.addTabBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.2em;
+    width: 1.2em;
+    align-self: center;
+    margin: 0.5em;
+    padding: 0em;
+    font-size: 1em;
+    font-weight: bold;
+    line-height: 1;
+    background-color: var(--primary);
+    color: var(--bg);
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 0 10px rgba(122, 162, 247, 0.5);
+}
+
+.addTabBtn:hover {
+    background-color: var(--accent);
+    box-shadow: 0 0 15px rgba(125, 207, 255, 0.6);
+}
+
+.flex-spacer {
+    flex-grow: 10000;
+}
+
+@media (max-width: 900px) {
+    #root {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        padding: 0.5rem;
+        /* Reduce padding on mobile */
+    }
+
+    #App {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    #nav {
+        width: 100%;
+        overflow-x: auto;
+        /* Allow horizontal scroll for tabs if needed */
+        flex-wrap: nowrap;
+        /* Keep tabs in a row if possible, or wrap? User said "merge split panes", didn't mention tabs. Let's keep wrap but allow scroll if needed */
+        /* Actually, wrap is better for many tabs on mobile */
+        flex-wrap: wrap;
+    }
+
+    .tab {
+        flex: 1 1 auto;
+        /* Allow tabs to shrink/grow */
+        min-width: auto;
+        /* Remove min-width to fit more */
+    }
+
+    .app-header {
+        flex-wrap: wrap;
+        gap: 0.5em;
+    }
+
+    .app-title {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0.5em;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: center;
+    }
 }
