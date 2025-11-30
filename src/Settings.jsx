@@ -159,6 +159,19 @@ function Settings({ isOpen, onClose, settings, onApply }) {
                                 </div>
                                 <p className="setting-desc">Include the Notes field in the JSON view.</p>
                             </div>
+
+                            <div className="setting-item checkbox-item">
+                                <div className="checkbox-control">
+                                    <input
+                                        id="show-metadata"
+                                        type="checkbox"
+                                        checked={localSettings.showMetadataInJson ?? DEFAULT_SETTINGS.showMetadataInJson}
+                                        onChange={(e) => handleUpdate('showMetadataInJson', e.target.checked)}
+                                    />
+                                    <label htmlFor="show-metadata">Show Metadata (Lengths & Limits)</label>
+                                </div>
+                                <p className="setting-desc">Include character counts and limit settings in the JSON view. These are read-only.</p>
+                            </div>
                         </div>
 
                         <div className="settings-column">

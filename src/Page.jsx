@@ -468,10 +468,37 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
   // NEW: Update JSON content when data changes if view is open
   useEffect(() => {
     if (showLLMView) {
-      const instances = Object.keys(variableValues).map((key, index) => ({
-        name: `Instance ${index + 1}`,
-        variables: variableValues[key].data
-      }));
+      const placeholder = settings?.variablePlaceholder || "{#var#}";
+      const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const placeholderRegex = new RegExp(escapeRegExp(placeholder), 'g');
+
+      const instances = Object.keys(variableValues).map((key, index) => {
+        const vars = variableValues[key].data;
+
+        // Create variable objects if metadata is enabled, otherwise strings
+        let variablesData = vars;
+        if (settings?.showMetadataInJson !== false) {
+          variablesData = vars.map(v => ({
+            value: v,
+            length: v.length
+          }));
+        }
+
+        const instanceObj = {
+          name: `Instance ${index + 1}`,
+          variables: variablesData
+        };
+
+        if (settings?.showMetadataInJson !== false) {
+          // Calculate message length
+          let varIndex = 0;
+          const message = input.replace(placeholderRegex, () => vars[varIndex++] || "");
+
+          instanceObj.currentMessageLength = message.length;
+        }
+
+        return instanceObj;
+      });
 
       const currentData = {
         title: title,
@@ -485,6 +512,18 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
       if (settings?.showNotesInJson !== false) {
         currentData.notes = notes;
+      }
+
+      if (settings?.showMetadataInJson !== false) {
+        currentData.currentTemplateLength = input.length;
+
+        currentData.targetMaxMessageLength = settings?.templateCharLimit
+          ? parseInt(settings.templateCharLimit)
+          : "No Limit";
+
+        currentData.targetMaxVariableLength = settings?.variableCharLimit
+          ? parseInt(settings.variableCharLimit)
+          : "No Limit";
       }
 
       setJsonContent(JSON.stringify(currentData, null, 2));
@@ -511,14 +550,17 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
         let maxVarCount = 0;
 
         parsedData.instances.forEach((inst, index) => {
-          // Generate ID: T{dataId}I{index} - consistent with createNewInstance logic but we might need to reset counter?
-          // Actually, createNewInstance uses instanceCounter.
-          // If we replace all instances, we can reset or just use a new set of IDs.
-          // Let's use a simple scheme for imported instances.
           const id = `T${dataId}I${index}`;
+
+          let varData = inst.variables || inst.data || [];
+          // Handle object-based variables (extract value)
+          if (Array.isArray(varData) && varData.length > 0 && typeof varData[0] === 'object' && varData[0] !== null) {
+            varData = varData.map(v => v.value !== undefined ? v.value : "");
+          }
+
           newVariableValues[id] = {
             id: id,
-            data: inst.variables || inst.data || [] // Support 'variables' or old 'data'
+            data: varData
           };
           if (newVariableValues[id].data.length > maxVarCount) {
             maxVarCount = newVariableValues[id].data.length;
@@ -1084,6 +1126,11 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
                 onChange={(e) => setJsonContent(e.target.value)}
                 placeholder="Paste JSON data here..."
               />
+              {settings?.showMetadataInJson !== false && (
+                <p className="json-view-hint">
+                  Note: Character counts and limits are for reference only and will be ignored when applying data.
+                </p>
+              )}
             </div>
           </div>
         </div>
