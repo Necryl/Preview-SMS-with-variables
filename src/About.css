@@ -1,0 +1,124 @@
+.about-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.about-modal {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.2s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.about-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em;
+    border-bottom: 1px solid var(--border);
+}
+
+.about-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    color: var(--fg);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--fg-dark);
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background-color: var(--terminal-red);
+    color: white;
+}
+
+.about-content {
+    padding: 1.5em;
+    color: var(--fg);
+    line-height: 1.6;
+    text-align: left;
+}
+
+.about-content h3 {
+    color: var(--primary);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.2em;
+}
+
+.about-content h3:first-child {
+    margin-top: 0;
+}
+
+.about-content ul {
+    padding-left: 1.2em;
+    margin-bottom: 1em;
+}
+
+.about-content li {
+    margin-bottom: 0.5em;
+}
+
+.about-content p {
+    margin-bottom: 1em;
+}
+
+.about-footer {
+    padding: 1em;
+    border-top: 1px solid var(--border);
+    text-align: left;
+    font-size: 0.9em;
+    color: var(--fg-dark);
+}
+
+.about-footer a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.about-footer a:hover {
+    text-decoration: underline;
+}

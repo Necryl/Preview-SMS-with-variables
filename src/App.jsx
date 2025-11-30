@@ -4,11 +4,12 @@ import "./App.css";
 import { useState, useEffect, useCallback } from "react";
 import { usePrompt } from "./Prompt.jsx";
 import Settings from "./Settings.jsx";
+import About from "./About.jsx";
 import useHistory from "./hooks/useHistory";
 
 import { migrateVariables } from "./utils";
 import { VscPinned } from "react-icons/vsc";
-import { MdPushPin, MdClose, MdAdd, MdRefresh, MdSettings, MdUndo, MdRedo } from "react-icons/md";
+import { MdPushPin, MdClose, MdAdd, MdRefresh, MdSettings, MdUndo, MdRedo, MdHelpOutline } from "react-icons/md";
 
 import { DEFAULT_SETTINGS } from "./config";
 
@@ -55,6 +56,7 @@ function App() {
 
   // Settings State (kept separate from history as settings changes shouldn't necessarily be undoable in the same stack, or maybe they should? User said "reset button" is exception. Let's keep settings separate for now as it's global config)
   const [showSettings, setShowSettings] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem("appSettings");
     return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
@@ -112,7 +114,8 @@ function App() {
         }
       } else if (e.key === 'Escape') {
         // Toggle settings on Escape, do NOT preventDefault as per user request
-        setShowSettings(prev => !prev);
+        if (showSettings) setShowSettings(false);
+        if (showAbout) setShowAbout(false);
       }
     };
 
@@ -354,6 +357,10 @@ function App() {
         settings={settings}
         onApply={handleApplySettings}
       />
+      <About
+        isOpen={showAbout}
+        onClose={() => setShowAbout(false)}
+      />
       <div className="app-header">
         <h1 className="app-title">Preview SMS with Variables</h1>
         <div className="header-controls">
@@ -446,6 +453,13 @@ function App() {
             onClick={() => setShowSettings(true)}
           >
             <MdSettings /> Settings
+          </button>
+          <button
+            className="icon-btn"
+            onClick={() => setShowAbout(true)}
+            title="About"
+          >
+            <MdHelpOutline />
           </button>
         </div>
       </div>
