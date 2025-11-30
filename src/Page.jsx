@@ -1135,6 +1135,9 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
           </div>
         </div>
       </div>
+      <div className="footer">
+        Created by <a href="https://github.com/Necryl/Preview-SMS-with-variables" target="_blank" rel="noopener noreferrer">Necryl</a> with the assistance of AI using Google AntiGravity
+      </div>
       {/* Notification Container */}
       <NotificationContainer notifications={notifications} />
     </div >
