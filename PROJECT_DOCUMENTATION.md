@@ -14,10 +14,29 @@ Report Generated on 30 November 2025 14:04
 ### Key Features
 - **Multi-Tab Interface**: Work on multiple different SMS campaigns or templates simultaneously. Tabs can be **pinned** to keep important templates safe and accessible.
 - **Keyboard Efficiency**: The application is built for speed.
-    - `Alt + N`: Add a new instance.
-    - `Alt + Shift + D`: Duplicate the selected instance.
-    - `Alt + Shift + Arrow Keys`: Navigate between tabs.
-    - `Ctrl + Z / Ctrl + Y`: robust Undo/Redo system.
+    
+    | Category | Action | Shortcut |
+    | :--- | :--- | :--- |
+    | **Global** | Undo | `Ctrl + Z` |
+    | | Redo | `Ctrl + Y` |
+    | | Toggle Settings / Close Dialogs | `Escape` |
+    | **Tabs** | New Tab | `Alt + A` |
+    | | Close Tab | `Alt + W` |
+    | | Previous Tab | `Alt + Shift + ←` |
+    | | Next Tab | `Alt + Shift + →` |
+    | **Instances** | Add Instance | `Alt + N` |
+    | | Duplicate Instance | `Alt + Shift + D` |
+    | | Delete Instance | `Alt + X` |
+    | | Select Previous | `Alt + ↑` |
+    | | Select Next | `Alt + ↓` |
+    | | Select Last | `Alt + End` |
+    | **Editor** | Insert Variable | `Alt + C` |
+    | | Focus Template | `Alt + Home` |
+    | | Focus Title | `Alt + Enter` |
+    | | Copy Template | `Alt + G` |
+    | | Copy Result | `Alt + B` |
+    | **Views** | Toggle Result View | `Alt + Q` |
+    | | Toggle JSON View | `Alt + J` |
 - **LLM Integration**: A dedicated "LLM View" generates a JSON representation of the current state (template + instances), optimized for pasting into tools like ChatGPT or Claude to generate variations or analyze content.
 - **Data Safety**:
     - **Auto-Save**: All work is persisted locally in the browser.

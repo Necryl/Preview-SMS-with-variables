@@ -114,14 +114,17 @@ function App() {
         }
       } else if (e.key === 'Escape') {
         // Toggle settings on Escape, do NOT preventDefault as per user request
-        if (showSettings) setShowSettings(false);
-        if (showAbout) setShowAbout(false);
+        if (showAbout) {
+          setShowAbout(false);
+        } else {
+          setShowSettings(prev => !prev);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, canUndo, canRedo]);
+  }, [undo, redo, canUndo, canRedo, showAbout]);
 
   // Keyboard Shortcuts for Tab Management
   useEffect(() => {

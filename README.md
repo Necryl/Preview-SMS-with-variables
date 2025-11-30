@@ -37,16 +37,31 @@ Designed for power users, the application can be controlled almost entirely via 
 
 | Action | Shortcut |
 |--------|----------|
-| **Add Instance** | `Alt + N` |
-| **Duplicate Instance** | `Alt + Shift + D` |
-| **Delete Instance** | `Alt + X` |
-| **Navigate Tabs** | `Alt + Shift + ←/→` |
-| **Toggle Result View** | `Alt + Q` |
-| **Toggle JSON View** | `Alt + J` |
-| **Copy Template** | `Alt + G` |
-| **Copy Result** | `Alt + B` |
-| **Insert Variable** | `Alt + C` |
-| **Undo / Redo** | `Ctrl + Z` / `Ctrl + Y` |
+| Global | |
+| Undo | `Ctrl + Z` |
+| Redo | `Ctrl + Y` |
+| Toggle Settings / Close Dialogs | `Escape` |
+| **Tab Management** | |
+| New Tab | `Alt + A` |
+| Close Tab | `Alt + W` |
+| Previous Tab | `Alt + Shift + ←` |
+| Next Tab | `Alt + Shift + →` |
+| **Instance Management** | |
+| Add Instance | `Alt + N` |
+| Duplicate Instance | `Alt + Shift + D` |
+| Delete Instance | `Alt + X` |
+| Select Previous Instance | `Alt + ↑` |
+| Select Next Instance | `Alt + ↓` |
+| Select Last Instance | `Alt + End` |
+| **Editor Actions** | |
+| Insert Variable | `Alt + C` |
+| Focus Template | `Alt + Home` |
+| Focus Title | `Alt + Enter` |
+| Copy Template | `Alt + G` |
+| Copy Result | `Alt + B` |
+| **View Toggles** | |
+| Toggle Result View | `Alt + Q` |
+| Toggle JSON View | `Alt + J` |
 
 ## 🛠️ Tech Stack
 

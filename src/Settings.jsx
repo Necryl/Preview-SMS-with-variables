@@ -178,20 +178,20 @@ function Settings({ isOpen, onClose, settings, onApply }) {
                             <h3>Keyboard Shortcuts</h3>
                             <ul className="shortcuts-list">
                                 <li><strong>Ctrl+Z / Ctrl+Y</strong>: Undo / Redo</li>
-                                <li><strong>Alt+W / Alt+A</strong>: Close Tab / New Tab</li>
-                                <li><strong>Alt+Shift+Left / Right</strong>: Previous / Next Tab</li>
-                                <li><strong>Alt+Up / Alt+Down</strong>: Select Previous / Next Instance</li>
-                                <li><strong>Alt+End</strong>: Select Last Instance</li>
+                                <li><strong>Escape</strong>: Toggle Settings / Close Dialogs</li>
+                                <li><strong>Alt+A / Alt+W</strong>: New Tab / Close Tab</li>
+                                <li><strong>Alt+Shift+← / →</strong>: Previous / Next Tab</li>
                                 <li><strong>Alt+N</strong>: New Instance</li>
-                                <li><strong>Alt+Shift+D</strong>: Duplicate Selected Instance</li>
-                                <li><strong>Alt+X</strong>: Delete Selected Instance</li>
-                                <li><strong>Alt+Q</strong>: Toggle Result View</li>
-                                <li><strong>Alt+J</strong>: Toggle JSON View</li>
+                                <li><strong>Alt+Shift+D</strong>: Duplicate Instance</li>
+                                <li><strong>Alt+X</strong>: Delete Instance</li>
+                                <li><strong>Alt+↑ / ↓</strong>: Select Prev / Next Instance</li>
+                                <li><strong>Alt+End</strong>: Select Last Instance</li>
                                 <li><strong>Alt+C</strong>: Insert Variable</li>
                                 <li><strong>Alt+Home</strong>: Focus Template</li>
                                 <li><strong>Alt+Enter</strong>: Focus Title</li>
-                                <li><strong>Alt+G</strong>: Copy Template</li>
-                                <li><strong>Alt+B</strong>: Copy Result</li>
+                                <li><strong>Alt+G / Alt+B</strong>: Copy Template / Result</li>
+                                <li><strong>Alt+Q</strong>: Toggle Result View</li>
+                                <li><strong>Alt+J</strong>: Toggle JSON View</li>
                             </ul>
                         </div>
                     </div>
