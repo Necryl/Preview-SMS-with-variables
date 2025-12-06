@@ -623,6 +623,11 @@ label.flash-active {
     font-weight: bold;
 }
 
+.border-risk-high {
+    border-color: var(--risk-high) !important;
+    box-shadow: 0 0 0 1px var(--risk-high) !important;
+}
+
 @media (max-width: 900px) {
     #Page {
         display: flex;
@@ -702,4 +707,35 @@ input::placeholder,
 textarea::placeholder {
     color: var(--fg-dark);
     opacity: 0.5;
+}
+
+/* Inline Result Styles - Mirrored from #result */
+#inline-result {
+    text-align: start;
+    display: grid;
+    gap: 1.5em;
+    padding: 2em;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    place-content: start;
+    background: var(--panel-bg);
+    /* backdrop-filter: blur(10px); - Optional for inline, but keeping for consistency if needed, though it might not show over anything */
+    margin-top: 1em;
+    margin-bottom: 2em;
+}
+
+.inline-result-content {
+    /* No specific styles needed for the wrapper if we style the p tags directly or let grid handle it */
+    display: contents;
+    /* Let children participate in the grid */
+}
+
+#inline-result p {
+    width: 100%;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    color: var(--fg);
+    margin: 0;
+    /* Reset default p margin */
 }

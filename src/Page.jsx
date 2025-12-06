@@ -1073,6 +1073,21 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
                 ))}
               </div>
             </div>
+
+            {/* Inline Result View */}
+            <div id="inline-result">
+              <div className="inline-result-content">
+                {resultText.map((text, index) => (
+                  <p key={index}>
+                    {text.split("\n").map((line, i) => (
+                      <React.Fragment key={i}>
+                        {line} <br />
+                      </React.Fragment>
+                    ))}
+                  </p>
+                ))}
+              </div>
+            </div>
           </div>
           <div
             id="result-wrapper"

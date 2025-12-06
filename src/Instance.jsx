@@ -53,10 +53,11 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc, previewT
       </div>
       <div className="vars">
         {data.map((value, i) => {
+          const isOverLimit = variableCharLimit && value.length > parseInt(variableCharLimit);
           return (
             <div className="var" key={"var" + i}>
               <label
-                className={`copy ${flashingIndex === i ? "flash-active" : ""}`}
+                className={`copy ${flashingIndex === i ? "flash-active" : ""} ${isOverLimit ? "text-risk-high" : ""}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   copyFunc(value);
@@ -69,7 +70,7 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc, previewT
                   type="text"
                   value={value}
                   data-index={i}
-                  className={copiedState && copiedState[i] ? "copied-warning" : ""}
+                  className={`${copiedState && copiedState[i] ? "copied-warning" : ""} ${isOverLimit ? "border-risk-high" : ""}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (copiedState && copiedState[i]) {
@@ -85,7 +86,7 @@ function Instance({ data, index, onVarChange, deleteInstance, copyFunc, previewT
                     }
                   }}
                 />
-                <span className={`charCount ${variableCharLimit && value.length > parseInt(variableCharLimit) ? "text-risk-high" : ""}`}>
+                <span className={`charCount ${isOverLimit ? "text-risk-high" : ""}`}>
                   {variableCharLimit
                     ? `${value.length} / ${variableCharLimit} chars`
                     : `${value.length} ${value.length < 2 ? "char" : "chars"}`}
