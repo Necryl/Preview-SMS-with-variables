@@ -334,24 +334,7 @@ textarea::-webkit-resizer {
     border-color: var(--terminal-red);
 }
 
-#llm-view textarea {
-    flex-grow: 1;
-    width: 100%;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1em;
-    color: var(--fg);
-    font-family: 'Fira Code', monospace;
-    font-size: 0.9em;
-    resize: none;
-    box-sizing: border-box;
-}
-
-#llm-view textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-}
+/* #llm-view textarea styles removed - replaced by JsonEditor */
 
 #result {
     text-align: start;

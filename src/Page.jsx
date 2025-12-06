@@ -3,6 +3,7 @@ import Instance from "./Instance.jsx";
 import { MdContentCopy, MdVisibility, MdVisibilityOff, MdAddCircleOutline, MdClose } from "react-icons/md";
 import { VscJson } from "react-icons/vsc";
 import { PiCornersOut } from "react-icons/pi";
+import JsonEditor from "./JsonEditor";
 import "./Page.css";
 import "./Notification.css";
 import NotificationContainer from './NotificationContainer';
@@ -414,6 +415,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
   const [showResult, setShowResult] = useState(false);
   const [showLLMView, setShowLLMView] = useState(false);
   const [jsonContent, setJsonContent] = useState("");
+  const [isJsonApplied, setIsJsonApplied] = useState(false);
 
   // NEW: State for notifications
   const [notifications, setNotifications] = useState([]);
@@ -588,8 +590,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       updateState(updates);
 
       addNotification("Data applied successfully!", 'medium');
+      setIsJsonApplied(true);
     } catch (e) {
       alert("Invalid JSON: " + e.message);
+      setIsJsonApplied(false);
     }
   };
 
@@ -1136,10 +1140,13 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
                   <MdClose />
                 </button>
               </div>
-              <textarea
+              <JsonEditor
                 value={jsonContent}
-                onChange={(e) => setJsonContent(e.target.value)}
-                placeholder="Paste JSON data here..."
+                onChange={(e) => {
+                  setJsonContent(e.target.value);
+                  setIsJsonApplied(false);
+                }}
+                isApplied={isJsonApplied}
               />
               {settings?.showMetadataInJson !== false && (
                 <p className="json-view-hint">
