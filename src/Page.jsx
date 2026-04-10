@@ -1,12 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import Instance from "./Instance.jsx";
-import { MdContentCopy, MdVisibility, MdVisibilityOff, MdAddCircleOutline, MdClose } from "react-icons/md";
+import {
+  MdContentCopy,
+  MdVisibility,
+  MdVisibilityOff,
+  MdAddCircleOutline,
+  MdClose,
+  MdCode,
+} from "react-icons/md";
 import { VscJson } from "react-icons/vsc";
 import { PiCornersOut } from "react-icons/pi";
 import JsonEditor from "./JsonEditor";
 import "./Page.css";
 import "./Notification.css";
-import NotificationContainer from './NotificationContainer';
+import NotificationContainer from "./NotificationContainer";
 import PropTypes from "prop-types";
 import { migrateVariables } from "./utils";
 
@@ -18,8 +25,20 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     variableValues = {},
     templateId = "",
     notes = "",
-    instanceCounter = 0
+    instanceCounter = 0,
+    placeholderOverride = "",
   } = data || {};
+
+  const resolvePlaceholderValue = (overrideValue = placeholderOverride) => {
+    if (typeof overrideValue === "string" && overrideValue.length > 0) {
+      return overrideValue;
+    }
+    return settings?.variablePlaceholder || "{#var#}";
+  };
+
+  const effectivePlaceholder = resolvePlaceholderValue();
+  const inheritedPlaceholder = settings?.variablePlaceholder || "{#var#}";
+  const editablePlaceholderValue = placeholderOverride || inheritedPlaceholder;
 
   // Track cursor position/selection
   const lastSelection = useRef({ start: 0, end: 0 });
@@ -45,7 +64,8 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       templateId,
       notes,
       instanceCounter,
-      ...updates
+      placeholderOverride,
+      ...updates,
     });
   };
 
@@ -53,15 +73,53 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
   const previousState = useRef({
     text: input,
     selection: { start: 0, end: 0 },
-    placeholder: settings?.variablePlaceholder || "{#var#}"
+    placeholder: effectivePlaceholder,
   });
 
   // Update previousState when data changes externally (e.g. undo/redo)
   useEffect(() => {
     previousState.current.text = input;
-    previousState.current.placeholder = settings?.variablePlaceholder || "{#var#}";
-  }, [input, settings?.variablePlaceholder]);
+    previousState.current.placeholder = effectivePlaceholder;
+  }, [input, effectivePlaceholder]);
 
+  function handlePlaceholderOverrideChange(nextOverrideValue) {
+    const normalizedOverride = nextOverrideValue || "";
+    const oldPlaceholder = effectivePlaceholder;
+    const newPlaceholder = resolvePlaceholderValue(normalizedOverride);
+
+    if (oldPlaceholder !== newPlaceholder && input) {
+      try {
+        const { newInput, newVariableValues } = migrateVariables(
+          input,
+          oldPlaceholder,
+          newPlaceholder,
+          variableValues || {},
+        );
+
+        const escapeRegExp = (string) =>
+          string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const placeholderRegex = new RegExp(escapeRegExp(newPlaceholder), "g");
+        const newVariableCount = (newInput.match(placeholderRegex) || [])
+          .length;
+
+        updateState({
+          placeholderOverride: normalizedOverride,
+          input: newInput,
+          variableValues: newVariableValues,
+          variableCount: newVariableCount,
+        });
+
+        previousState.current.text = newInput;
+      } catch (e) {
+        console.error("Failed to migrate placeholder override", e);
+        updateState({ placeholderOverride: normalizedOverride });
+      }
+    } else {
+      updateState({ placeholderOverride: normalizedOverride });
+    }
+
+    previousState.current.placeholder = newPlaceholder;
+  }
 
   function deleteInstance(id) {
     const instanceIds = Object.keys(variableValues);
@@ -104,19 +162,27 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     };
   }
 
-  function calculateVariableChanges(prevText, currText, prevPlaceholder, currPlaceholder, selectionRange) {
+  function calculateVariableChanges(
+    prevText,
+    currText,
+    prevPlaceholder,
+    currPlaceholder,
+    selectionRange,
+  ) {
     // Helper to escape regex special characters
     const escapeRegExp = (string) => {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     };
 
-    const prevPlaceholderRegex = new RegExp(escapeRegExp(prevPlaceholder), 'g');
-    const currPlaceholderRegex = new RegExp(escapeRegExp(currPlaceholder), 'g');
+    const prevPlaceholderRegex = new RegExp(escapeRegExp(prevPlaceholder), "g");
+    const currPlaceholderRegex = new RegExp(escapeRegExp(currPlaceholder), "g");
 
     // 1. Find Common Prefix
     // Constrain by selection start if available (this prevents greedy matching across the insertion point)
     let commonPrefixLen = 0;
-    const maxPrefixLen = selectionRange ? selectionRange.start : prevText.length;
+    const maxPrefixLen = selectionRange
+      ? selectionRange.start
+      : prevText.length;
     const minLen = Math.min(prevText.length, currText.length);
 
     while (
@@ -130,12 +196,15 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     // 2. Find Common Suffix
     // Constrain by selection end if available
     let commonSuffixLen = 0;
-    const maxSuffixLen = selectionRange ? (prevText.length - selectionRange.end) : prevText.length;
+    const maxSuffixLen = selectionRange
+      ? prevText.length - selectionRange.end
+      : prevText.length;
 
     while (
       commonSuffixLen < minLen - commonPrefixLen &&
       commonSuffixLen < maxSuffixLen &&
-      prevText[prevText.length - 1 - commonSuffixLen] === currText[currText.length - 1 - commonSuffixLen]
+      prevText[prevText.length - 1 - commonSuffixLen] ===
+        currText[currText.length - 1 - commonSuffixLen]
     ) {
       commonSuffixLen++;
     }
@@ -161,9 +230,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
   function synchronizeVariables(varsBefore, varsRemoved, varsAdded, newText) {
     // Calculate new variable count
-    const placeholder = settings?.variablePlaceholder || "{#var#}";
-    const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const placeholderRegex = new RegExp(escapeRegExp(placeholder), 'g');
+    const placeholder = effectivePlaceholder;
+    const escapeRegExp = (string) =>
+      string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const placeholderRegex = new RegExp(escapeRegExp(placeholder), "g");
     const newVariableCount = (newText.match(placeholderRegex) || []).length;
 
     if (varsRemoved === 0 && varsAdded === 0) {
@@ -179,7 +249,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       const varsToKeepBefore = currentData.slice(0, varsBefore);
 
       // 2. Identify variables in the affected range (removed/replaced)
-      const varsInAffectedRange = currentData.slice(varsBefore, varsBefore + varsRemoved);
+      const varsInAffectedRange = currentData.slice(
+        varsBefore,
+        varsBefore + varsRemoved,
+      );
 
       // 3. Identify variables after the change (untouched)
       const varsToKeepAfter = currentData.slice(varsBefore + varsRemoved);
@@ -209,7 +282,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     updateState({
       input: newText,
       variableValues: newValues,
-      variableCount: newVariableCount
+      variableCount: newVariableCount,
     });
 
     // Handle copied variables highlighting update (local state)
@@ -227,7 +300,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
           if (oldIndex < varsBefore) {
             // Before the change: keep as is
             newHighlights[oldIndex] = true;
-          } else if (oldIndex >= varsBefore && oldIndex < varsBefore + varsRemoved) {
+          } else if (
+            oldIndex >= varsBefore &&
+            oldIndex < varsBefore + varsRemoved
+          ) {
             // In the affected range (removed/replaced)
             // Check if this index is "reused"
             const offsetInAffected = oldIndex - varsBefore;
@@ -255,7 +331,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
   function processTextChange(newText) {
     const prevText = previousState.current.text;
     const prevPlaceholder = previousState.current.placeholder || "{#var#}";
-    const currPlaceholder = settings?.variablePlaceholder || "{#var#}";
+    const currPlaceholder = effectivePlaceholder;
     const selectionRange = previousState.current.selection;
 
     const { varsBefore, varsRemoved, varsAdded } = calculateVariableChanges(
@@ -263,7 +339,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       newText,
       prevPlaceholder,
       currPlaceholder,
-      selectionRange
+      selectionRange,
     );
 
     synchronizeVariables(varsBefore, varsRemoved, varsAdded, newText);
@@ -285,7 +361,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
   }
 
   function handleClearCopied(instanceId, varIndex) {
-    setCopiedVariables(prev => {
+    setCopiedVariables((prev) => {
       if (!prev[instanceId] || !prev[instanceId][varIndex]) return prev;
 
       const newInstanceCopied = { ...prev[instanceId] };
@@ -300,14 +376,18 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
       return {
         ...prev,
-        [instanceId]: newInstanceCopied
+        [instanceId]: newInstanceCopied,
       };
     });
   }
 
   function createNewInstance(forceEmpty = false) {
     let initialData = [];
-    if (!forceEmpty && selectedInstanceId && variableValues[selectedInstanceId]) {
+    if (
+      !forceEmpty &&
+      selectedInstanceId &&
+      variableValues[selectedInstanceId]
+    ) {
       // Copy data from selected instance
       initialData = [...variableValues[selectedInstanceId].data];
     }
@@ -315,7 +395,9 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     const newId = "T" + dataId + "I" + instanceCounter;
     const newInstance = {
       id: newId,
-      data: initialData.concat(Array(Math.max(variableCount - initialData.length, 0)).fill("")),
+      data: initialData.concat(
+        Array(Math.max(variableCount - initialData.length, 0)).fill(""),
+      ),
     };
 
     const result = { ...variableValues };
@@ -323,7 +405,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
     updateState({
       variableValues: result,
-      instanceCounter: instanceCounter + 1
+      instanceCounter: instanceCounter + 1,
     });
 
     // If we copied data, mark variables as copied
@@ -335,9 +417,9 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
         }
       });
 
-      setCopiedVariables(prev => ({
+      setCopiedVariables((prev) => ({
         ...prev,
-        [newId]: newCopiedState
+        [newId]: newCopiedState,
       }));
     }
   }
@@ -347,7 +429,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       .writeText(text)
       .then(() => {
         console.log("Text copied to clipboard:", text);
-        addNotification(text, 'positive');
+        addNotification(text, "positive");
       })
       .catch((err) => {
         console.error("Failed to copy text: ", err);
@@ -356,11 +438,11 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
   function replacePlaceholders(text, values) {
     let index = 0; // To keep track of the array index
-    const placeholder = settings?.variablePlaceholder || "{#var#}";
+    const placeholder = effectivePlaceholder;
     const escapeRegExp = (string) => {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     };
-    const placeholderRegex = new RegExp(escapeRegExp(placeholder), 'g');
+    const placeholderRegex = new RegExp(escapeRegExp(placeholder), "g");
 
     // Replace each placeholder with the next value in the array, if available
     return text.replace(placeholderRegex, () => values[index++] || "");
@@ -379,12 +461,12 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const text = textarea.value;
-    const variable = settings?.variablePlaceholder || "{#var#}";
+    const variable = effectivePlaceholder;
 
     // Update our internal state to match current DOM state before processing
     previousState.current.selection = { start, end };
     previousState.current.text = text;
-    previousState.current.placeholder = settings?.variablePlaceholder || "{#var#}";
+    previousState.current.placeholder = effectivePlaceholder;
 
     // Construct new text
     let newText = "";
@@ -403,42 +485,56 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
     // Update selection
     const newCursorPos = start + variable.length;
-    previousState.current.selection = { start: newCursorPos, end: newCursorPos };
+    previousState.current.selection = {
+      start: newCursorPos,
+      end: newCursorPos,
+    };
 
     setTimeout(() => {
       if (textareaRef.current) {
-        textareaRef.current.selectionStart = textareaRef.current.selectionEnd = newCursorPos;
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
+          newCursorPos;
       }
     }, 0);
   };
 
   const [showResult, setShowResult] = useState(false);
   const [showLLMView, setShowLLMView] = useState(false);
+  const [showPlaceholderEditor, setShowPlaceholderEditor] = useState(false);
+  const [draftPlaceholderOverride, setDraftPlaceholderOverride] = useState(
+    editablePlaceholderValue,
+  );
   const [jsonContent, setJsonContent] = useState("");
   const [isJsonApplied, setIsJsonApplied] = useState(false);
+  const placeholderEditorRef = useRef(null);
 
   // NEW: State for notifications
   const [notifications, setNotifications] = useState([]);
 
   // NEW: Function to add a notification
-  const addNotification = (text, risk = 'low') => {
+  const addNotification = (text, risk = "low") => {
     const id = Date.now();
     let displayMessage = text;
-    if (risk === 'positive') {
+    if (risk === "positive") {
       displayMessage = `Copied: ${text}`;
     }
 
-    setNotifications(prev => {
-      const updated = [{ id, text: displayMessage, fading: false, risk }, ...prev].slice(0, 2);
+    setNotifications((prev) => {
+      const updated = [
+        { id, text: displayMessage, fading: false, risk },
+        ...prev,
+      ].slice(0, 2);
       return updated;
     });
 
     setTimeout(() => {
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, fading: true } : n));
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, fading: true } : n)),
+      );
     }, 4500);
 
     setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, 5000);
   };
 
@@ -447,12 +543,12 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     const handleCopy = (e) => {
       const selection = document.getSelection();
       if (selection && selection.toString().length > 0) {
-        addNotification(selection.toString(), 'positive');
+        addNotification(selection.toString(), "positive");
       }
     };
 
-    window.addEventListener('copy', handleCopy);
-    return () => window.removeEventListener('copy', handleCopy);
+    window.addEventListener("copy", handleCopy);
+    return () => window.removeEventListener("copy", handleCopy);
   }, []);
 
   const [flashingComponent, setFlashingComponent] = useState(null);
@@ -467,12 +563,51 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     setShowResult(false); // Ensure result view is closed
   };
 
+  useEffect(() => {
+    setDraftPlaceholderOverride(editablePlaceholderValue);
+  }, [editablePlaceholderValue, dataId]);
+
+  useEffect(() => {
+    if (!showPlaceholderEditor) {
+      return;
+    }
+
+    const handlePointerDown = (event) => {
+      if (
+        placeholderEditorRef.current &&
+        !placeholderEditorRef.current.contains(event.target)
+      ) {
+        setShowPlaceholderEditor(false);
+        setDraftPlaceholderOverride(editablePlaceholderValue);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [showPlaceholderEditor, editablePlaceholderValue]);
+
+  const handleApplyPlaceholderOverride = () => {
+    const nextOverride =
+      draftPlaceholderOverride === inheritedPlaceholder
+        ? ""
+        : draftPlaceholderOverride;
+
+    handlePlaceholderOverrideChange(nextOverride);
+    setShowPlaceholderEditor(false);
+  };
+
+  const handleCancelPlaceholderOverride = () => {
+    setDraftPlaceholderOverride(editablePlaceholderValue);
+    setShowPlaceholderEditor(false);
+  };
+
   // NEW: Update JSON content when data changes if view is open
   useEffect(() => {
     if (showLLMView) {
-      const placeholder = settings?.variablePlaceholder || "{#var#}";
-      const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const placeholderRegex = new RegExp(escapeRegExp(placeholder), 'g');
+      const placeholder = effectivePlaceholder;
+      const escapeRegExp = (string) =>
+        string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const placeholderRegex = new RegExp(escapeRegExp(placeholder), "g");
 
       const instances = Object.keys(variableValues).map((key, index) => {
         const vars = variableValues[key].data;
@@ -480,21 +615,24 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
         // Create variable objects if metadata is enabled, otherwise strings
         let variablesData = vars;
         if (settings?.showMetadataInJson !== false) {
-          variablesData = vars.map(v => ({
+          variablesData = vars.map((v) => ({
             value: v,
-            length: v.length
+            length: v.length,
           }));
         }
 
         const instanceObj = {
           name: `Instance ${index + 1}`,
-          variables: variablesData
+          variables: variablesData,
         };
 
         if (settings?.showMetadataInJson !== false) {
           // Calculate message length
           let varIndex = 0;
-          const message = input.replace(placeholderRegex, () => vars[varIndex++] || "");
+          const message = input.replace(
+            placeholderRegex,
+            () => vars[varIndex++] || "",
+          );
 
           instanceObj.currentMessageLength = message.length;
         }
@@ -530,7 +668,17 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
       setJsonContent(JSON.stringify(currentData, null, 2));
     }
-  }, [showLLMView, input, variableCount, variableValues, templateId, notes, settings, title]);
+  }, [
+    showLLMView,
+    input,
+    variableCount,
+    variableValues,
+    templateId,
+    notes,
+    settings,
+    title,
+    effectivePlaceholder,
+  ]);
 
   const handleApplyLLMData = () => {
     try {
@@ -542,7 +690,8 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       }
 
       // Map 'template' -> 'input'
-      if (parsedData.template !== undefined) updates.input = parsedData.template;
+      if (parsedData.template !== undefined)
+        updates.input = parsedData.template;
       // Fallback for old 'input' property
       else if (parsedData.input !== undefined) updates.input = parsedData.input;
 
@@ -556,13 +705,20 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
           let varData = inst.variables || inst.data || [];
           // Handle object-based variables (extract value)
-          if (Array.isArray(varData) && varData.length > 0 && typeof varData[0] === 'object' && varData[0] !== null) {
-            varData = varData.map(v => v.value !== undefined ? v.value : "");
+          if (
+            Array.isArray(varData) &&
+            varData.length > 0 &&
+            typeof varData[0] === "object" &&
+            varData[0] !== null
+          ) {
+            varData = varData.map((v) =>
+              v.value !== undefined ? v.value : "",
+            );
           }
 
           newVariableValues[id] = {
             id: id,
-            data: varData
+            data: varData,
           };
           if (newVariableValues[id].data.length > maxVarCount) {
             maxVarCount = newVariableValues[id].data.length;
@@ -579,7 +735,8 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
         // Let's trust input if provided, or calc.
       }
 
-      if (parsedData.templateId !== undefined) updates.templateId = parsedData.templateId;
+      if (parsedData.templateId !== undefined)
+        updates.templateId = parsedData.templateId;
       if (parsedData.notes !== undefined) updates.notes = parsedData.notes;
 
       // If variableCount is explicitly provided in old format, use it, otherwise we calculated it above
@@ -589,7 +746,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
       updateState(updates);
 
-      addNotification("Data applied successfully!", 'medium');
+      addNotification("Data applied successfully!", "medium");
       setIsJsonApplied(true);
     } catch (e) {
       alert("Invalid JSON: " + e.message);
@@ -603,10 +760,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       setSelectedInstanceId(null);
     };
 
-    window.addEventListener('click', handleGlobalClick);
+    window.addEventListener("click", handleGlobalClick);
 
     return () => {
-      window.removeEventListener('click', handleGlobalClick);
+      window.removeEventListener("click", handleGlobalClick);
     };
   }, []);
 
@@ -621,12 +778,12 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
         if (window.innerWidth <= 900) {
           window.scrollTo({
             top: document.body.scrollHeight,
-            behavior: 'smooth'
+            behavior: "smooth",
           });
         } else if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTo({
             top: scrollContainerRef.current.scrollHeight,
-            behavior: 'smooth'
+            behavior: "smooth",
           });
         }
       }, 100);
@@ -640,7 +797,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     if (selectedInstanceId) {
       const element = document.getElementById(selectedInstanceId);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
         // If navigation was triggered by shortcut, ALWAYS focus the instance
         if (wasShortcutNavigation.current) {
@@ -669,8 +826,8 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     if (textareaRef.current) {
       lastHeight.current = textareaRef.current.offsetHeight;
     }
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
     e.preventDefault(); // Prevent text selection during drag
   };
 
@@ -683,8 +840,8 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
   const handleMouseUp = () => {
     isResizing.current = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
   };
 
   // NEW: Mobile Result View Dismiss Logic
@@ -694,7 +851,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
   const handleResultTouchStart = (e) => {
     touchStartRef.current = {
       x: e.touches[0].clientX,
-      y: e.touches[0].clientY
+      y: e.touches[0].clientY,
     };
     isDraggingRef.current = false;
   };
@@ -728,7 +885,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
     const handlePageShortcuts = (e) => {
       if (e.altKey) {
         switch (e.key.toLowerCase()) {
-          case 'arrowup':
+          case "arrowup":
             e.preventDefault();
             // If we are in the textarea, Alt+Up should do nothing (stay there)
             if (document.activeElement === textareaRef.current) {
@@ -737,7 +894,9 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
             if (Object.keys(variableValues).length > 0) {
               const instanceIds = Object.keys(variableValues);
-              const currentIndex = selectedInstanceId ? instanceIds.indexOf(selectedInstanceId) : -1;
+              const currentIndex = selectedInstanceId
+                ? instanceIds.indexOf(selectedInstanceId)
+                : -1;
               wasShortcutNavigation.current = true;
 
               if (currentIndex === 0) {
@@ -745,7 +904,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
                 setSelectedInstanceId(null);
                 if (textareaRef.current) {
                   textareaRef.current.focus();
-                  textareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  textareaRef.current.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
                 }
               } else if (currentIndex > 0) {
                 setSelectedInstanceId(instanceIds[currentIndex - 1]);
@@ -756,31 +918,36 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               }
             }
             break;
-          case 'arrowdown':
+          case "arrowdown":
             e.preventDefault();
             if (Object.keys(variableValues).length > 0) {
               const instanceIds = Object.keys(variableValues);
-              const currentIndex = selectedInstanceId ? instanceIds.indexOf(selectedInstanceId) : -1;
+              const currentIndex = selectedInstanceId
+                ? instanceIds.indexOf(selectedInstanceId)
+                : -1;
               wasShortcutNavigation.current = true;
-              if (currentIndex < instanceIds.length - 1 && currentIndex !== -1) {
+              if (
+                currentIndex < instanceIds.length - 1 &&
+                currentIndex !== -1
+              ) {
                 setSelectedInstanceId(instanceIds[currentIndex + 1]);
               } else if (currentIndex === -1) {
                 setSelectedInstanceId(instanceIds[0]);
               }
             }
             break;
-          case 'x':
+          case "x":
             e.preventDefault();
             if (selectedInstanceId) {
               deleteInstance(selectedInstanceId);
             }
             break;
-          case 'q':
+          case "q":
             e.preventDefault();
-            setShowResult(prev => !prev);
+            setShowResult((prev) => !prev);
             if (!showResult) setShowLLMView(false); // If opening result, close LLM view (logic from toggle button)
             break;
-          case 'j':
+          case "j":
             e.preventDefault();
             if (showLLMView) {
               setShowLLMView(false);
@@ -788,22 +955,22 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               handleOpenLLMView();
             }
             break;
-          case 'c':
+          case "c":
             e.preventDefault();
             handleInsertVariable();
             break;
-          case 'g':
+          case "g":
             e.preventDefault();
             copyToClipboard(input);
-            triggerFlash('template');
+            triggerFlash("template");
             break;
-          case 'b':
+          case "b":
             e.preventDefault();
             const text = resultText.join("\n\n");
             copyToClipboard(text);
-            triggerFlash('result');
+            triggerFlash("result");
             break;
-          case 'home':
+          case "home":
             e.preventDefault();
             // Close views if open
             if (showResult) setShowResult(false);
@@ -811,16 +978,19 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
             if (textareaRef.current) {
               textareaRef.current.focus();
-              textareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              textareaRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
             }
             break;
-          case 'enter':
+          case "enter":
             e.preventDefault();
             if (titleInputRef.current) {
               titleInputRef.current.focus();
             }
             break;
-          case 'end':
+          case "end":
             e.preventDefault();
             if (Object.keys(variableValues).length > 0) {
               const instanceIds = Object.keys(variableValues);
@@ -828,11 +998,11 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               setSelectedInstanceId(instanceIds[instanceIds.length - 1]);
             }
             break;
-          case 'n':
+          case "n":
             e.preventDefault();
             createNewInstance(true); // Force empty
             break;
-          case 'd':
+          case "d":
             if (e.shiftKey) {
               e.preventDefault();
               if (selectedInstanceId) {
@@ -846,15 +1016,22 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       }
     };
 
-    window.addEventListener('keydown', handlePageShortcuts);
-    return () => window.removeEventListener('keydown', handlePageShortcuts);
-  }, [variableValues, selectedInstanceId, showResult, showLLMView, input, resultText]);
+    window.addEventListener("keydown", handlePageShortcuts);
+    return () => window.removeEventListener("keydown", handlePageShortcuts);
+  }, [
+    variableValues,
+    selectedInstanceId,
+    showResult,
+    showLLMView,
+    input,
+    resultText,
+  ]);
 
   // Cleanup event listeners on unmount
   useEffect(() => {
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, []);
 
@@ -863,10 +1040,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
       <div className="left-column">
         <label
           id="title"
-          className={`copy ${flashingComponent === 'title' ? 'flash-active' : ''}`}
+          className={`copy ${flashingComponent === "title" ? "flash-active" : ""}`}
           onClick={(e) => {
             copyToClipboard(title);
-            triggerFlash('title');
+            triggerFlash("title");
           }}
         >
           Title:
@@ -882,10 +1059,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
         </label>
         <div className="meta-fields">
           <label
-            className={`copy ${flashingComponent === 'templateId' ? 'flash-active' : ''}`}
+            className={`copy ${flashingComponent === "templateId" ? "flash-active" : ""}`}
             onClick={(e) => {
               copyToClipboard(templateId);
-              triggerFlash('templateId');
+              triggerFlash("templateId");
             }}
           >
             Template ID:
@@ -898,10 +1075,10 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
             />
           </label>
           <label
-            className={`copy notes-label ${flashingComponent === 'notes' ? 'flash-active' : ''}`}
+            className={`copy notes-label ${flashingComponent === "notes" ? "flash-active" : ""}`}
             onClick={(e) => {
               copyToClipboard(notes);
-              triggerFlash('notes');
+              triggerFlash("notes");
             }}
           >
             Notes:
@@ -917,6 +1094,72 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
 
       <div className="right-column">
         <div className="right-header">
+          <div className="placeholder-editor-wrap" ref={placeholderEditorRef}>
+            <button
+              type="button"
+              className={`placeholder-trigger-btn ${showPlaceholderEditor ? "active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setDraftPlaceholderOverride(editablePlaceholderValue);
+                setShowPlaceholderEditor((prev) => !prev);
+              }}
+              title={`Edit tab placeholder. Current: ${effectivePlaceholder}`}
+            >
+              <MdCode />
+              <span className="placeholder-trigger-label">Placeholder</span>
+              {placeholderOverride && (
+                <span
+                  className="placeholder-custom-indicator"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+            {showPlaceholderEditor && (
+              <div
+                className="placeholder-popover"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="placeholder-popover-header">
+                  <strong>Tab Placeholder</strong>
+                  <span>Current: {effectivePlaceholder}</span>
+                </div>
+                <input
+                  type="text"
+                  value={draftPlaceholderOverride}
+                  onChange={(e) => setDraftPlaceholderOverride(e.target.value)}
+                  placeholder={`Use default (${inheritedPlaceholder})`}
+                />
+                <p className="placeholder-popover-hint">
+                  Changes only apply after you click Apply.
+                </p>
+                <div className="placeholder-popover-actions">
+                  <button
+                    type="button"
+                    className="placeholder-secondary-btn"
+                    onClick={() =>
+                      setDraftPlaceholderOverride(inheritedPlaceholder)
+                    }
+                  >
+                    Use Default
+                  </button>
+                  <button
+                    type="button"
+                    className="placeholder-secondary-btn"
+                    onClick={handleCancelPlaceholderOverride}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="placeholder-apply-btn"
+                    onClick={handleApplyPlaceholderOverride}
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <button
             className="toggle-result-btn"
             onClick={() => {
@@ -927,7 +1170,15 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               }
             }}
           >
-            {showLLMView ? <><VscJson /> Hide JSON View</> : <><VscJson /> JSON View</>}
+            {showLLMView ? (
+              <>
+                <VscJson /> Hide JSON View
+              </>
+            ) : (
+              <>
+                <VscJson /> JSON View
+              </>
+            )}
           </button>
           <button
             className="toggle-result-btn"
@@ -938,36 +1189,45 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               setShowResult(!showResult);
             }}
           >
-            {showResult ? <><MdVisibilityOff /> Hide Result</> : <><MdVisibility /> Show Result</>}
+            {showResult ? (
+              <>
+                <MdVisibilityOff /> Hide Result
+              </>
+            ) : (
+              <>
+                <MdVisibility /> Show Result
+              </>
+            )}
           </button>
           <button
-            className={`copyBtn ${flashingComponent === 'result' ? 'flash-active' : ''}`}
+            className={`copyBtn ${flashingComponent === "result" ? "flash-active" : ""}`}
             onClick={(e) => {
               const text = resultText.join("\n\n");
               copyToClipboard(text);
-              triggerFlash('result');
+              triggerFlash("result");
             }}
           >
             <MdContentCopy /> Copy Result
           </button>
           <button
-            className={`copyBtn ${flashingComponent === 'template' ? 'flash-active' : ''}`}
+            className={`copyBtn ${flashingComponent === "template" ? "flash-active" : ""}`}
             onClick={(e) => {
               copyToClipboard(input);
-              triggerFlash('template');
+              triggerFlash("template");
             }}
           >
             <MdContentCopy /> Copy Template
           </button>
           <button
-            className={`addBtn ${selectedInstanceId ? 'warn' : ''} ${flashingComponent === 'addBtn' ? 'flash-active' : ''}`}
+            className={`addBtn ${selectedInstanceId ? "warn" : ""} ${flashingComponent === "addBtn" ? "flash-active" : ""}`}
             onClick={(e) => {
               e.stopPropagation();
               createNewInstance();
-              if (selectedInstanceId) triggerFlash('addBtn');
+              if (selectedInstanceId) triggerFlash("addBtn");
             }}
           >
-            <MdAddCircleOutline /> {selectedInstanceId ? 'Copy Instance' : 'Add Instance'}
+            <MdAddCircleOutline />{" "}
+            {selectedInstanceId ? "Copy Instance" : "Add Instance"}
           </button>
         </div>
         <div className="right-content-wrapper">
@@ -985,7 +1245,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
                   onClick={handleSelectionUpdate}
                   onKeyUp={handleSelectionUpdate}
                   value={input}
-                  placeholder={`Paste SMS here with variables as ${settings?.variablePlaceholder || "{#var#}"}`}
+                  placeholder={`Paste SMS here with variables as ${effectivePlaceholder}`}
                 ></textarea>
                 <div className="resize-handle" onMouseDown={handleMouseDown}>
                   <PiCornersOut />
@@ -994,14 +1254,19 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               <div className="textareaExtras">
                 <span>
                   {(() => {
-                    const placeholder = settings?.variablePlaceholder || "{#var#}";
+                    const placeholder = effectivePlaceholder;
                     const placeholderLen = placeholder.length;
-                    const staticLength = input.length - (variableCount * placeholderLen);
+                    const staticLength =
+                      input.length - variableCount * placeholderLen;
                     const minChars = staticLength;
                     const hasTemplateLimit = !!settings?.templateCharLimit;
                     const hasVariableLimit = !!settings?.variableCharLimit;
-                    const templateLimit = hasTemplateLimit ? parseInt(settings.templateCharLimit) : 0;
-                    const variableLimit = hasVariableLimit ? parseInt(settings.variableCharLimit) : 0;
+                    const templateLimit = hasTemplateLimit
+                      ? parseInt(settings.templateCharLimit)
+                      : 0;
+                    const variableLimit = hasVariableLimit
+                      ? parseInt(settings.variableCharLimit)
+                      : 0;
 
                     if (!hasTemplateLimit && !hasVariableLimit) {
                       return `Min: ${minChars} chars`;
@@ -1010,34 +1275,43 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
                     const stats = [];
 
                     // Min Chars
-                    const minHighRisk = hasTemplateLimit && minChars > templateLimit;
+                    const minHighRisk =
+                      hasTemplateLimit && minChars > templateLimit;
                     stats.push(
-                      <span key="min" className={minHighRisk ? "text-risk-high" : ""}>
+                      <span
+                        key="min"
+                        className={minHighRisk ? "text-risk-high" : ""}
+                      >
                         {`Min: ${minChars} chars`}
-                      </span>
+                      </span>,
                     );
 
                     // Max Chars
                     if (hasVariableLimit) {
-                      const maxChars = minChars + (variableCount * variableLimit);
-                      const maxHighRisk = hasTemplateLimit && maxChars > templateLimit;
+                      const maxChars = minChars + variableCount * variableLimit;
+                      const maxHighRisk =
+                        hasTemplateLimit && maxChars > templateLimit;
                       stats.push(
-                        <span key="max" className={maxHighRisk ? "text-risk-high" : ""}>
+                        <span
+                          key="max"
+                          className={maxHighRisk ? "text-risk-high" : ""}
+                        >
                           {`Max: ${maxChars} chars`}
-                        </span>
+                        </span>,
                       );
                     }
 
                     // Avg Var Target
                     if (hasTemplateLimit && variableCount > 0) {
-                      let avgVarTarget = (templateLimit - minChars) / variableCount;
+                      let avgVarTarget =
+                        (templateLimit - minChars) / variableCount;
                       if (hasVariableLimit) {
                         avgVarTarget = Math.min(avgVarTarget, variableLimit);
                       }
                       stats.push(
                         <span key="avg">
                           {`Avg Var Target: ${Math.floor(avgVarTarget)} chars`}
-                        </span>
+                        </span>,
                       );
                     }
 
@@ -1050,9 +1324,7 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               </div>
             </div>
             <div id="instances">
-              <div
-                id="board"
-              >
+              <div id="board">
                 {Object.keys(variableValues).map((instance, i) => (
                   <Instance
                     data={variableValues[instance].data}
@@ -1070,7 +1342,9 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
                     isSelected={selectedInstanceId === instance}
                     onSelect={() => setSelectedInstanceId(instance)}
                     copiedState={copiedVariables[instance]}
-                    onClearCopied={(varIndex) => handleClearCopied(instance, varIndex)}
+                    onClearCopied={(varIndex) =>
+                      handleClearCopied(instance, varIndex)
+                    }
                     variableCharLimit={settings?.variableCharLimit}
                     templateCharLimit={settings?.templateCharLimit}
                   />
@@ -1095,12 +1369,12 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
           </div>
           <div
             id="result-wrapper"
-            className={showResult ? 'visible' : ''}
+            className={showResult ? "visible" : ""}
             onTouchStart={handleResultTouchStart}
             onTouchMove={handleResultTouchMove}
             onTouchEnd={handleResultTouchEnd}
             onClick={() => {
-              // Also handle click for non-touch interaction if needed, 
+              // Also handle click for non-touch interaction if needed,
               // but user specifically asked for mobile tap.
               // We can rely on touch events for mobile.
               // But if we want to support click on background for desktop?
@@ -1122,16 +1396,19 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
             </div>
           </div>
 
-          <div id="llm-wrapper" className={showLLMView ? 'visible' : ''}>
+          <div id="llm-wrapper" className={showLLMView ? "visible" : ""}>
             <div id="llm-view">
               <div className="llm-controls">
                 <button onClick={handleApplyLLMData}>Apply Data</button>
                 <button
-                  className={flashingComponent === 'json' ? 'flash-active' : ''}
+                  className={flashingComponent === "json" ? "flash-active" : ""}
                   onClick={(e) => {
                     copyToClipboard(jsonContent);
-                    triggerFlash('json');
-                  }}>Copy JSON</button>
+                    triggerFlash("json");
+                  }}
+                >
+                  Copy JSON
+                </button>
                 <button
                   className="close-json-btn"
                   onClick={() => setShowLLMView(false)}
@@ -1150,7 +1427,8 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
               />
               {settings?.showMetadataInJson !== false && (
                 <p className="json-view-hint">
-                  Note: Character counts and limits are for reference only and will be ignored when applying data.
+                  Note: Character counts and limits are for reference only and
+                  will be ignored when applying data.
                 </p>
               )}
             </div>
@@ -1158,11 +1436,19 @@ function Page({ dataId, setTitle, title, settings, data, onUpdate }) {
         </div>
       </div>
       <div className="footer">
-        Created by <a href="https://github.com/Necryl/Preview-SMS-with-variables" target="_blank" rel="noopener noreferrer">Necryl</a> with the assistance of AI using Google AntiGravity
+        Created by{" "}
+        <a
+          href="https://github.com/Necryl/Preview-SMS-with-variables"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Necryl
+        </a>{" "}
+        with the assistance of AI using Google AntiGravity
       </div>
       {/* Notification Container */}
       <NotificationContainer notifications={notifications} />
-    </div >
+    </div>
   );
 }
 

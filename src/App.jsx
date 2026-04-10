@@ -9,15 +9,37 @@ import useHistory from "./hooks/useHistory";
 
 import { migrateVariables } from "./utils";
 import { VscPinned } from "react-icons/vsc";
-import { MdPushPin, MdClose, MdAdd, MdRefresh, MdSettings, MdUndo, MdRedo, MdHelpOutline } from "react-icons/md";
+import {
+  MdPushPin,
+  MdClose,
+  MdAdd,
+  MdRefresh,
+  MdSettings,
+  MdUndo,
+  MdRedo,
+  MdHelpOutline,
+} from "react-icons/md";
 
 import { DEFAULT_SETTINGS } from "./config";
 
 if (!DEFAULT_SETTINGS.variablePlaceholder) {
-  throw new Error("DEFAULT_SETTINGS.variablePlaceholder cannot be empty. Please check src/config.js");
+  throw new Error(
+    "DEFAULT_SETTINGS.variablePlaceholder cannot be empty. Please check src/config.js",
+  );
 }
 
 function App() {
+  const resolveEffectivePlaceholder = (
+    tabDataEntry,
+    fallbackSettings = settings,
+  ) => {
+    const override = tabDataEntry?.placeholderOverride;
+    if (typeof override === "string" && override.length > 0) {
+      return override;
+    }
+    return fallbackSettings?.variablePlaceholder || "{#var#}";
+  };
+
   // Initial State Loading
   const loadInitialState = () => {
     const savedTabs = JSON.parse(localStorage.getItem("tabs")) || {};
@@ -25,7 +47,7 @@ function App() {
 
     // Load data for all tabs
     const tabData = {};
-    Object.keys(savedTabs).forEach(tabId => {
+    Object.keys(savedTabs).forEach((tabId) => {
       const data = localStorage.getItem(tabId);
       if (data) {
         try {
@@ -48,18 +70,21 @@ function App() {
     return {
       tabs: initialTabs,
       currentTab: initialCurrentTab,
-      tabData: tabData
+      tabData: tabData,
     };
   };
 
-  const { state, set, undo, redo, canUndo, canRedo, reset } = useHistory(loadInitialState());
+  const { state, set, undo, redo, canUndo, canRedo, reset } =
+    useHistory(loadInitialState());
 
   // Settings State (kept separate from history as settings changes shouldn't necessarily be undoable in the same stack, or maybe they should? User said "reset button" is exception. Let's keep settings separate for now as it's global config)
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem("appSettings");
-    return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
+    return saved
+      ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }
+      : DEFAULT_SETTINGS;
   });
 
   useEffect(() => {
@@ -74,28 +99,27 @@ function App() {
 
     // Save Tab Data
     // We only need to save the data that exists in state.tabData
-    // But we should also clean up data for deleted tabs? 
-    // The history state might contain data for deleted tabs if we undo? 
+    // But we should also clean up data for deleted tabs?
+    // The history state might contain data for deleted tabs if we undo?
     // Actually, if we delete a tab, we remove it from tabs map.
     // Let's iterate through state.tabs to save active ones.
 
-    Object.keys(state.tabs).forEach(tabId => {
+    Object.keys(state.tabs).forEach((tabId) => {
       if (state.tabData[tabId]) {
         localStorage.setItem(tabId, JSON.stringify(state.tabData[tabId]));
       }
     });
 
-    // Clean up orphaned data in localStorage? 
+    // Clean up orphaned data in localStorage?
     // Maybe not aggressively, to avoid data loss if something goes wrong.
     // But strictly speaking, if it's not in tabs, it shouldn't be accessible.
     // For now, let's just save what we have.
-
   }, [state]);
 
   // Keyboard Shortcuts for Undo/Redo
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         if (e.shiftKey) {
           if (canRedo) {
             e.preventDefault();
@@ -107,23 +131,23 @@ function App() {
             undo();
           }
         }
-      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
         if (canRedo) {
           e.preventDefault();
           redo();
         }
-      } else if (e.key === 'Escape') {
+      } else if (e.key === "Escape") {
         // Toggle settings on Escape, do NOT preventDefault as per user request
         if (showAbout) {
           setShowAbout(false);
         } else {
-          setShowSettings(prev => !prev);
+          setShowSettings((prev) => !prev);
         }
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [undo, redo, canUndo, canRedo, showAbout]);
 
   // Keyboard Shortcuts for Tab Management
@@ -131,15 +155,15 @@ function App() {
     const handleTabShortcuts = (e) => {
       if (e.altKey) {
         switch (e.key.toLowerCase()) {
-          case 'w':
+          case "w":
             e.preventDefault();
             removeTab(state.currentTab);
             break;
-          case 'a':
+          case "a":
             e.preventDefault();
             createTab();
             break;
-          case 'arrowleft':
+          case "arrowleft":
             if (e.shiftKey) {
               e.preventDefault();
               {
@@ -151,7 +175,7 @@ function App() {
               }
             }
             break;
-          case 'arrowright':
+          case "arrowright":
             if (e.shiftKey) {
               e.preventDefault();
               {
@@ -169,35 +193,42 @@ function App() {
       }
     };
 
-    window.addEventListener('keydown', handleTabShortcuts);
-    return () => window.removeEventListener('keydown', handleTabShortcuts);
+    window.addEventListener("keydown", handleTabShortcuts);
+    return () => window.removeEventListener("keydown", handleTabShortcuts);
   }, [state, set]);
-
 
   const handleApplySettings = (newSettings) => {
     // Check if placeholder changed to trigger migration
     if (newSettings.variablePlaceholder !== settings.variablePlaceholder) {
       const oldPlaceholder = settings.variablePlaceholder;
-      const newPlaceholder = newSettings.variablePlaceholder;
 
       // We need to update state.tabData with migrated values
       const newTabData = { ...state.tabData };
       let hasChanges = false;
 
-      Object.keys(state.tabs).forEach(tabId => {
+      Object.keys(state.tabs).forEach((tabId) => {
         const data = newTabData[tabId];
         if (data && data.input) {
+          // Per-tab overrides should not be affected by global placeholder changes.
+          if (
+            typeof data.placeholderOverride === "string" &&
+            data.placeholderOverride.length > 0
+          ) {
+            return;
+          }
+
+          const newPlaceholder = resolveEffectivePlaceholder(data, newSettings);
           try {
             const { newInput, newVariableValues } = migrateVariables(
               data.input,
               oldPlaceholder,
               newPlaceholder,
-              data.variableValues || {}
+              data.variableValues || {},
             );
             newTabData[tabId] = {
               ...data,
               input: newInput,
-              variableValues: newVariableValues
+              variableValues: newVariableValues,
             };
             hasChanges = true;
           } catch (e) {
@@ -209,7 +240,7 @@ function App() {
       if (hasChanges) {
         set({
           ...state,
-          tabData: newTabData
+          tabData: newTabData,
         });
       }
     }
@@ -233,12 +264,14 @@ function App() {
         [id]: {
           input: "",
           variableCount: 0,
-          variableValues: { ["T" + id + "I0"]: { id: "T" + id + "I0", data: [] } },
+          variableValues: {
+            ["T" + id + "I0"]: { id: "T" + id + "I0", data: [] },
+          },
           templateId: "",
           notes: "",
-          instanceCounter: 1
-        }
-      }
+          instanceCounter: 1,
+        },
+      },
     });
   }
 
@@ -272,14 +305,14 @@ function App() {
     // Also remove data?
     const newTabData = { ...state.tabData };
     // delete newTabData[id]; // Optional: keep data in history? Yes, if we undo, we want it back.
-    // But for the *current* state, we can keep it or remove it. 
+    // But for the *current* state, we can keep it or remove it.
     // If we remove it from tabs, user can't access it.
     // If we undo, we restore tabs AND tabData.
 
     const newState = {
       ...state,
       tabs: newTabs,
-      currentTab: newCurrentTab
+      currentTab: newCurrentTab,
     };
 
     if (Object.keys(newTabs).length === 0) {
@@ -292,11 +325,13 @@ function App() {
         [newId]: {
           input: "",
           variableCount: 0,
-          variableValues: { ["T" + newId + "I0"]: { id: "T" + newId + "I0", data: [] } },
+          variableValues: {
+            ["T" + newId + "I0"]: { id: "T" + newId + "I0", data: [] },
+          },
           templateId: "",
           notes: "",
-          instanceCounter: 1
-        }
+          instanceCounter: 1,
+        },
       };
     }
 
@@ -310,8 +345,8 @@ function App() {
         ...state,
         tabs: {
           ...state.tabs,
-          [id]: { ...state.tabs[id], pinned: !state.tabs[id].pinned }
-        }
+          [id]: { ...state.tabs[id], pinned: !state.tabs[id].pinned },
+        },
       });
     }
   }
@@ -322,33 +357,39 @@ function App() {
         ...state,
         tabs: {
           ...state.tabs,
-          [id]: { ...state.tabs[id], title: title }
-        }
+          [id]: { ...state.tabs[id], title: title },
+        },
       });
     }
   }
 
   // Page Data Update Handler
-  const handlePageUpdate = useCallback((newData) => {
-    let newTabs = state.tabs;
+  const handlePageUpdate = useCallback(
+    (newData) => {
+      let newTabs = state.tabs;
 
-    // If title is provided in the update, update the tab title as well
-    if (newData.title !== undefined) {
-      newTabs = {
-        ...state.tabs,
-        [state.currentTab]: { ...state.tabs[state.currentTab], title: newData.title }
-      };
-    }
-
-    set({
-      ...state,
-      tabs: newTabs,
-      tabData: {
-        ...state.tabData,
-        [state.currentTab]: newData
+      // If title is provided in the update, update the tab title as well
+      if (newData.title !== undefined) {
+        newTabs = {
+          ...state.tabs,
+          [state.currentTab]: {
+            ...state.tabs[state.currentTab],
+            title: newData.title,
+          },
+        };
       }
-    });
-  }, [state, set]);
+
+      set({
+        ...state,
+        tabs: newTabs,
+        tabData: {
+          ...state.tabData,
+          [state.currentTab]: newData,
+        },
+      });
+    },
+    [state, set],
+  );
 
   const { showPrompt } = usePrompt();
 
@@ -360,10 +401,7 @@ function App() {
         settings={settings}
         onApply={handleApplySettings}
       />
-      <About
-        isOpen={showAbout}
-        onClose={() => setShowAbout(false)}
-      />
+      <About isOpen={showAbout} onClose={() => setShowAbout(false)} />
       <div className="app-header">
         <h1 className="app-title">Preview SMS with Variables</h1>
         <div className="header-controls">
@@ -386,30 +424,25 @@ function App() {
           <button
             id="reset"
             onClick={async () => {
-              const result = await showPrompt("Are you sure you want to reset everything?", [
-                { label: "Cancel", value: "Cancel", risk: "low" },
-                { label: "Confirm", value: "Confirm", risk: "high" }
-              ]);
+              const result = await showPrompt(
+                "Are you sure you want to reset everything?",
+                [
+                  { label: "Cancel", value: "Cancel", risk: "low" },
+                  { label: "Confirm", value: "Confirm", risk: "high" },
+                ],
+              );
               if (result === "Confirm") {
                 // Smart Reset Logic - similar to before but using history reset
                 const pinnedTabs = {};
                 const pinnedTabsData = {};
 
-                Object.keys(state.tabs).forEach(tabId => {
+                Object.keys(state.tabs).forEach((tabId) => {
                   if (state.tabs[tabId].pinned) {
                     pinnedTabs[tabId] = state.tabs[tabId];
                     const data = state.tabData[tabId];
                     if (data) {
-                      // Filter pinned instances
-                      let newVariableValues = {};
-                      if (data.variableValues) {
-                        Object.keys(data.variableValues).forEach(instanceId => {
-                          if (data.variableValues[instanceId].pinned) {
-                            newVariableValues[instanceId] = data.variableValues[instanceId];
-                          }
-                        });
-                      }
-                      pinnedTabsData[tabId] = { ...data, variableValues: newVariableValues };
+                      // Preserve full pinned tab payload, including all instances and content.
+                      pinnedTabsData[tabId] = { ...data };
                     }
                   }
                 });
@@ -420,7 +453,10 @@ function App() {
 
                 let newTabs = pinnedTabs;
                 let newTabData = pinnedTabsData;
-                let newCurrentTab = Object.keys(pinnedTabs).length > 0 ? Number(Object.keys(pinnedTabs)[0]) : 1;
+                let newCurrentTab =
+                  Object.keys(pinnedTabs).length > 0
+                    ? Number(Object.keys(pinnedTabs)[0])
+                    : 1;
 
                 if (Object.keys(newTabs).length === 0) {
                   newTabs = { 1: { title: "SMS 1", pinned: false } };
@@ -428,11 +464,11 @@ function App() {
                     1: {
                       input: "",
                       variableCount: 0,
-                      variableValues: { "T1I0": { id: "T1I0", data: [] } },
+                      variableValues: { T1I0: { id: "T1I0", data: [] } },
                       templateId: "",
                       notes: "",
-                      instanceCounter: 1
-                    }
+                      instanceCounter: 1,
+                    },
                   };
                   newCurrentTab = 1;
                 }
@@ -440,7 +476,7 @@ function App() {
                 reset({
                   tabs: newTabs,
                   currentTab: newCurrentTab,
-                  tabData: newTabData
+                  tabData: newTabData,
                 });
 
                 // Force reload not needed if we update state correctly, but maybe safer to ensure clean slate?
@@ -451,10 +487,7 @@ function App() {
           >
             <MdRefresh /> Reset
           </button>
-          <button
-            id="settings"
-            onClick={() => setShowSettings(true)}
-          >
+          <button id="settings" onClick={() => setShowSettings(true)}>
             <MdSettings /> Settings
           </button>
           <button
@@ -469,7 +502,7 @@ function App() {
       <div id="nav">
         {Object.keys(state.tabs).map((key, i) => (
           <button
-            className={`tab ${state.tabs[key].pinned ? 'pinned' : ''} ${Number(state.currentTab) === Number(key) ? 'active' : ''}`}
+            className={`tab ${state.tabs[key].pinned ? "pinned" : ""} ${Number(state.currentTab) === Number(key) ? "active" : ""}`}
             onClick={() => set({ ...state, currentTab: Number(key) })}
             key={i}
           >
@@ -512,7 +545,11 @@ function App() {
       <Page
         dataId={Number(state.currentTab)}
         setTitle={(title) => setTabTitle(state.currentTab, title)}
-        title={state.tabs[state.currentTab] ? state.tabs[state.currentTab].title : "loading..."}
+        title={
+          state.tabs[state.currentTab]
+            ? state.tabs[state.currentTab].title
+            : "loading..."
+        }
         settings={settings}
         data={state.tabData[state.currentTab] || {}}
         onUpdate={handlePageUpdate}

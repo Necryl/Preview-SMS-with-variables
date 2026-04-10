@@ -1,724 +1,884 @@
 #Page {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-template-rows: 1fr auto;
-    gap: 2em;
-    width: 100%;
-    padding: 1em;
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-    box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 1fr auto;
+  gap: 2em;
+  width: 100%;
+  padding: 1em;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .left-column {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5em;
-    height: 100%;
-    overflow-y: hidden;
-    padding-top: 0;
-    padding-bottom: 0;
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  height: 100%;
+  overflow-y: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+  box-sizing: border-box;
 }
 
 .right-column {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 
-    height: 100%;
-    min-height: 0;
+  height: 100%;
+  min-height: 0;
 }
 
-
 #Page #title {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 1em;
-    padding: 0.5em;
-    align-items: center;
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    flex-shrink: 0;
-    /* Don't shrink title */
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1em;
+  padding: 0.5em;
+  align-items: center;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-shrink: 0;
+  /* Don't shrink title */
 }
 
 #Page #title input {
-    background: transparent;
-    border: none;
-    color: var(--primary);
-    font-size: 1.2em;
-    font-weight: bold;
-    width: 100%;
-    padding: 0.2em;
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 1.2em;
+  font-weight: bold;
+  width: 100%;
+  padding: 0.2em;
 }
 
 #Page #title input:focus {
-    outline: none;
-    border-bottom: 1px solid var(--primary);
+  outline: none;
+  border-bottom: 1px solid var(--primary);
 }
 
 /* Meta Fields (Template ID & Contact) */
 .meta-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5em;
-    margin-bottom: 0;
-    /* Remove bottom margin as we use padding in parent */
-    background: var(--panel-bg);
-    padding: 1.5em;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    flex-grow: 1;
-    /* Take up remaining space */
-    min-height: 0;
-    /* Allow flex item to shrink below content size */
-    overflow: hidden;
-    /* Container for scrollable content */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  margin-bottom: 0;
+  /* Remove bottom margin as we use padding in parent */
+  background: var(--panel-bg);
+  padding: 1.5em;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  flex-grow: 1;
+  /* Take up remaining space */
+  min-height: 0;
+  /* Allow flex item to shrink below content size */
+  overflow: hidden;
+  /* Container for scrollable content */
 }
 
 .meta-fields label {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5em;
-    font-size: 0.9em;
-    color: var(--fg-dark);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5em;
+  font-size: 0.9em;
+  color: var(--fg-dark);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
 }
 
 .meta-fields label.notes-label {
-    flex-grow: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .meta-fields input,
 .meta-fields textarea {
-    background-color: var(--input-bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.8em;
-    color: var(--fg);
-    font-size: 1em;
-    width: 100%;
-    transition: all 0.2s;
-    font-family: inherit;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.8em;
+  color: var(--fg);
+  font-size: 1em;
+  width: 100%;
+  transition: all 0.2s;
+  font-family: inherit;
 }
 
 .meta-fields textarea {
-    resize: none;
-    /* Disable manual resize as it fills the space */
-    flex-grow: 1;
-    overflow-y: auto;
-    /* Scroll internally */
-    /* Scroll internally */
-    flex: 1;
-    /* Fill the label container */
+  resize: none;
+  /* Disable manual resize as it fills the space */
+  flex-grow: 1;
+  overflow-y: auto;
+  /* Scroll internally */
+  /* Scroll internally */
+  flex: 1;
+  /* Fill the label container */
 }
 
 /* Custom Resize Handle for all textareas */
 textarea::-webkit-scrollbar-corner {
-    background-color: var(--input-bg);
+  background-color: var(--input-bg);
 }
 
 textarea::-webkit-resizer {
-    background-color: var(--input-bg);
-    background-image: radial-gradient(circle, var(--fg-dark) 40%, transparent 40%);
-    background-position: bottom 4px right 4px;
-    background-size: 8px 8px;
-    background-repeat: no-repeat;
+  background-color: var(--input-bg);
+  background-image: radial-gradient(
+    circle,
+    var(--fg-dark) 40%,
+    transparent 40%
+  );
+  background-position: bottom 4px right 4px;
+  background-size: 8px 8px;
+  background-repeat: no-repeat;
 }
 
 .meta-fields input:focus,
 .meta-fields textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
 }
 
 #input {
-    display: grid;
-    gap: 0.5em;
+  display: grid;
+  gap: 0.5em;
 }
 
 .textarea-wrapper {
-    position: relative;
-    display: grid;
+  position: relative;
+  display: grid;
 }
 
 #input textarea {
-    width: 100%;
-    min-height: 150px;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1em;
-    color: var(--fg);
-    font-family: 'Inter', monospace;
-    font-size: 1em;
-    resize: none;
+  width: 100%;
+  min-height: 150px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1em;
+  color: var(--fg);
+  font-family: "Inter", monospace;
+  font-size: 1em;
+  resize: none;
 }
 
 /* Add space at the bottom of the scrollbar to avoid overlap with resize handle */
 #input textarea::-webkit-scrollbar-button:vertical:end:increment {
-    display: block;
-    height: 30px;
-    background-color: transparent;
+  display: block;
+  height: 30px;
+  background-color: transparent;
 }
 
 #input textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
 }
 
 .resize-handle {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    cursor: se-resize;
-    color: var(--fg-dark);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px;
-    z-index: 10;
-    pointer-events: auto;
-    opacity: 0.5;
-    transition: opacity 0.2s;
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  cursor: se-resize;
+  color: var(--fg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  z-index: 10;
+  pointer-events: auto;
+  opacity: 0.5;
+  transition: opacity 0.2s;
 }
 
 .resize-handle:hover {
-    opacity: 1;
-    color: var(--primary);
+  opacity: 1;
+  color: var(--primary);
 }
 
 #input .textareaExtras {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    color: var(--fg-dark);
-    font-size: 0.9em;
-    align-items: center;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  color: var(--fg-dark);
+  font-size: 0.9em;
+  align-items: center;
 }
 
 .right-header {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1em;
-    margin-bottom: 1em;
-    flex-shrink: 0;
-    align-items: center;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1em;
+  margin-bottom: 1em;
+  flex-shrink: 0;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.placeholder-editor-wrap {
+  position: relative;
+}
+
+.placeholder-trigger-btn {
+  background: color-mix(in srgb, var(--panel-bg) 78%, transparent);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  min-height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  position: relative;
+  padding: 0.55em 0.9em;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.placeholder-trigger-label {
+  font-size: 0.9rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.placeholder-trigger-btn:hover,
+.placeholder-trigger-btn.active {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.placeholder-popover {
+  position: absolute;
+  top: calc(100% + 0.5em);
+  right: 0;
+  width: min(320px, calc(100vw - 2em));
+  background: color-mix(in srgb, var(--panel-bg) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  padding: 0.9em;
+  z-index: 150;
+  display: grid;
+  gap: 0.75em;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.placeholder-popover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  );
+  pointer-events: none;
+}
+
+.placeholder-popover > * {
+  position: relative;
+  z-index: 1;
+}
+
+.placeholder-custom-indicator {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--risk-medium);
+  box-shadow: 0 0 0 2px var(--panel-bg);
+}
+
+.placeholder-popover-header {
+  display: grid;
+  gap: 0.2em;
+}
+
+.placeholder-popover-header strong {
+  color: var(--fg);
+  font-size: 0.95em;
+}
+
+.placeholder-popover-header span,
+.placeholder-popover-hint {
+  color: var(--fg-dark);
+  font-size: 0.82em;
+}
+
+.placeholder-popover input {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75em;
+  color: var(--fg);
+  font-size: 0.95em;
+  width: 100%;
+}
+
+.placeholder-popover input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+}
+
+.placeholder-popover-hint {
+  margin: 0;
+}
+
+.placeholder-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5em;
+  flex-wrap: wrap;
+}
+
+.placeholder-secondary-btn,
+.placeholder-apply-btn {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: all 0.2s;
+  padding: 0.55em 0.85em;
+}
+
+.placeholder-secondary-btn {
+  background: transparent;
+  color: var(--fg);
+}
+
+.placeholder-secondary-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.placeholder-apply-btn {
+  background: var(--primary);
+  color: var(--bg-dark);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.placeholder-apply-btn:hover {
+  filter: brightness(1.05);
 }
 
 .right-content-wrapper {
-    flex-grow: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
+  flex-grow: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .right-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2em;
-    padding-right: 0.5em;
-    height: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  padding-right: 0.5em;
+  height: 100%;
 }
 
 .right-content.no-scroll {
-    overflow-y: hidden;
+  overflow-y: hidden;
 }
 
 .toggle-result-btn,
 .copyBtn,
 .addBtn {
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    color: var(--fg);
-    padding: 0.5em 1em;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.2s;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  padding: 0.5em 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
 }
 
 .toggle-result-btn:hover,
 .copyBtn:hover,
 .addBtn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .addBtn.warn {
-    border-color: var(--risk-medium);
-    color: var(--risk-medium);
+  border-color: var(--risk-medium);
+  color: var(--risk-medium);
 }
 
 .addBtn.warn:hover {
-    background-color: rgba(224, 175, 104, 0.1);
+  background-color: rgba(224, 175, 104, 0.1);
 }
 
 #result-wrapper,
 #llm-wrapper {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 100;
-    box-sizing: border-box;
-    overflow-y: auto;
-    background: transparent;
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: transparent;
 }
 
 #result-wrapper.visible,
 #llm-wrapper.visible {
-    display: grid;
+  display: grid;
 }
 
 #llm-wrapper {
-    background: var(--panel-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  background: var(--panel-bg);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 #llm-view {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 2em;
-    box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 2em;
+  box-sizing: border-box;
 }
 
 .llm-controls {
-    display: flex;
-    gap: 1em;
-    margin-bottom: 1em;
-    align-items: center;
+  display: flex;
+  gap: 1em;
+  margin-bottom: 1em;
+  align-items: center;
 }
 
 .close-json-btn {
-    margin-left: auto;
-    /* Push to the right */
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--fg-dark);
-    font-size: 1.2em;
-    padding: 0.4em;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  margin-left: auto;
+  /* Push to the right */
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--fg-dark);
+  font-size: 1.2em;
+  padding: 0.4em;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-json-btn:hover {
-    background-color: var(--terminal-red);
-    color: white;
-    border-color: var(--terminal-red);
+  background-color: var(--terminal-red);
+  color: white;
+  border-color: var(--terminal-red);
 }
 
 /* #llm-view textarea styles removed - replaced by JsonEditor */
 
 #result {
-    text-align: start;
-    display: grid;
-    gap: 1.5em;
-    padding: 2em;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    place-content: start;
-    background: var(--panel-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  text-align: start;
+  display: grid;
+  gap: 1.5em;
+  padding: 2em;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  place-content: start;
+  background: var(--panel-bg);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 #result p {
-    width: 100%;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    line-height: 1.6;
-    color: var(--fg);
+  width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: var(--fg);
 }
 
 .instance {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1em;
-    background: var(--bg-dark);
-    /* Changed from rgba(26, 27, 38, 0.6) */
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    /* Changed from var(--glass-border) */
-    border-radius: 0.5em;
-    /* Changed from 12px */
-    padding: 1em;
-    /* Changed from 1.5em */
-    position: relative;
-    transition: all 0.2s;
-    /* Changed from transform 0.2s, border-color 0.2s */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+  background: var(--bg-dark);
+  /* Changed from rgba(26, 27, 38, 0.6) */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  /* Changed from var(--glass-border) */
+  border-radius: 0.5em;
+  /* Changed from 12px */
+  padding: 1em;
+  /* Changed from 1.5em */
+  position: relative;
+  transition: all 0.2s;
+  /* Changed from transform 0.2s, border-color 0.2s */
 }
 
 .instance:focus {
-    outline: none;
+  outline: none;
 }
 
 .instance:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
+  border-color: var(--primary);
+  transform: translateY(-2px);
 }
 
 .instance.selected {
-    border-color: var(--risk-medium);
-    box-shadow: 0 0 0 2px rgba(224, 175, 104, 0.4);
-    transform: translateY(-2px);
+  border-color: var(--risk-medium);
+  box-shadow: 0 0 0 2px rgba(224, 175, 104, 0.4);
+  transform: translateY(-2px);
 }
 
-.instance>h3 {
-    margin: 0;
-    color: var(--secondary);
-    font-size: 1.1em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    cursor: default;
-    width: fit-content;
+.instance > h3 {
+  margin: 0;
+  color: var(--secondary);
+  font-size: 1.1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  cursor: default;
+  width: fit-content;
 }
 
 /* Tooltip styles removed - using Portal Tooltip component */
 
 .instance label {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 1em;
-    align-items: center;
-    color: var(--fg-dark);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1em;
+  align-items: center;
+  color: var(--fg-dark);
 }
 
 .instance input {
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.5em;
-    color: var(--fg);
+  background-color: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5em;
+  color: var(--fg);
 }
 
 .copy {
-    cursor: pointer;
-    transition: color 0.2s;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
 .copy:hover {
-    color: var(--primary);
+  color: var(--primary);
 }
 
 .vars {
-    display: grid;
-    gap: 0.8em;
+  display: grid;
+  gap: 0.8em;
 }
 
 .var {
-    display: grid;
-    grid-template-columns: auto;
-    gap: 1em;
-    align-items: center;
+  display: grid;
+  grid-template-columns: auto;
+  gap: 1em;
+  align-items: center;
 }
 
 .var label {
-    display: grid;
-    grid-template-columns: 6em 1fr auto;
-    gap: 0.3em;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 6em 1fr auto;
+  gap: 0.3em;
+  align-items: center;
 }
 
 .var label span {
-    min-width: 5em;
+  min-width: 5em;
 }
 
 .var input {
-    min-width: none;
-    width: 100%;
+  min-width: none;
+  width: 100%;
 }
 
 .instance-stats {
-    margin-top: 0.5em;
-    font-size: 0.9em;
-    color: var(--fg-dark);
-    text-align: right;
-    font-style: italic;
+  margin-top: 0.5em;
+  font-size: 0.9em;
+  color: var(--fg-dark);
+  text-align: right;
+  font-style: italic;
 }
 
 #board {
-    display: grid;
-    gap: 1.5em;
+  display: grid;
+  gap: 1.5em;
 }
 
 #instances {
-    display: grid;
-    gap: 1.5em;
+  display: grid;
+  gap: 1.5em;
 }
 
 .instanceMenu {
-    gap: 1em;
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1em;
+  gap: 1em;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1em;
 }
 
 .delete-instance-btn {
-    position: absolute;
-    top: 0.5em;
-    right: 0.5em;
-    background: transparent;
-    border: none;
-    color: var(--fg-dark);
-    font-size: 1em;
-    cursor: pointer;
-    padding: 0.4em;
-    border-radius: 4px;
-    transition: all 0.2s;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  background: transparent;
+  border: none;
+  color: var(--fg-dark);
+  font-size: 1em;
+  cursor: pointer;
+  padding: 0.4em;
+  border-radius: 4px;
+  transition: all 0.2s;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
 .delete-instance-btn:hover {
-    color: #ff5555;
-    background: rgba(255, 85, 85, 0.1);
+  color: #ff5555;
+  background: rgba(255, 85, 85, 0.1);
 }
 
 /* Flash Animation */
 @keyframes flash {
-    0% {
-        background-color: cyan;
-        color: #000;
-    }
+  0% {
+    background-color: cyan;
+    color: #000;
+  }
 
-    100% {
-        background-color: var(--panel-bg);
-        color: inherit;
-    }
+  100% {
+    background-color: var(--panel-bg);
+    color: inherit;
+  }
 }
 
 .flash-active {
-    animation: flash 0.4s ease-out;
+  animation: flash 0.4s ease-out;
 }
 
 /* Specific overrides */
 .copyBtn.flash-active,
 .toggle-result-btn.flash-active,
 .addBtn.flash-active {
-    animation-name: flash-button;
+  animation-name: flash-button;
 }
 
 @keyframes flash-button {
-    0% {
-        background-color: cyan;
-        color: #000;
-        border-color: cyan;
-    }
+  0% {
+    background-color: cyan;
+    color: #000;
+    border-color: cyan;
+  }
 
-    100% {
-        background-color: var(--panel-bg);
-        color: var(--fg);
-        border-color: var(--border);
-    }
+  100% {
+    background-color: var(--panel-bg);
+    color: var(--fg);
+    border-color: var(--border);
+  }
 }
 
 label.flash-active {
-    animation-name: flash-label;
+  animation-name: flash-label;
 }
 
 @keyframes flash-label {
-    0% {
-        background-color: rgba(0, 255, 255, 0.2);
-    }
+  0% {
+    background-color: rgba(0, 255, 255, 0.2);
+  }
 
-    100% {
-        background-color: transparent;
-    }
+  100% {
+    background-color: transparent;
+  }
 }
 
 /* Copied Variable Highlight */
 .instance input.copied-warning {
-    border-color: var(--risk-medium);
-    box-shadow: 0 0 0 1px var(--risk-medium);
-    transition: border-color 0.3s, box-shadow 0.3s;
+  border-color: var(--risk-medium);
+  box-shadow: 0 0 0 1px var(--risk-medium);
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .instance input.copied-warning:focus {
-    border-color: var(--risk-medium);
-    box-shadow: 0 0 0 2px var(--risk-medium);
+  border-color: var(--risk-medium);
+  box-shadow: 0 0 0 2px var(--risk-medium);
 }
 
 .instance-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 10px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .clear-instance-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--fg-dim);
-    cursor: pointer;
-    font-size: 0.8rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    transition: all 0.2s;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .clear-instance-btn:hover {
-    background: var(--bg-hover);
-    color: var(--fg);
-    border-color: var(--fg-dim);
+  background: var(--bg-hover);
+  color: var(--fg);
+  border-color: var(--fg-dim);
 }
 
 .delete-instance-btn {
-    /* Override absolute positioning since it's now in a flex container */
-    position: static !important;
+  /* Override absolute positioning since it's now in a flex container */
+  position: static !important;
 }
 
 .text-risk-high {
-    color: var(--risk-high) !important;
-    font-weight: bold;
+  color: var(--risk-high) !important;
+  font-weight: bold;
 }
 
 .border-risk-high {
-    border-color: var(--risk-high) !important;
-    box-shadow: 0 0 0 1px var(--risk-high) !important;
+  border-color: var(--risk-high) !important;
+  box-shadow: 0 0 0 1px var(--risk-high) !important;
 }
 
 @media (max-width: 900px) {
-    #Page {
-        display: flex;
-        flex-direction: column;
-        height: auto;
-        overflow: visible;
-        gap: 1.5em;
-    }
+  #Page {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+    gap: 1.5em;
+  }
 
-    .left-column,
-    .right-column {
-        width: 100%;
-        height: auto;
-        overflow: visible;
-    }
+  .left-column,
+  .right-column {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
 
-    .meta-fields {
-        overflow: visible;
-        height: auto;
-    }
+  .meta-fields {
+    overflow: visible;
+    height: auto;
+  }
 
-    .meta-fields textarea {
-        min-height: 100px;
-        /* Ensure some height since we removed flex grow constraint */
-    }
+  .meta-fields textarea {
+    min-height: 100px;
+    /* Ensure some height since we removed flex grow constraint */
+  }
 
-    .right-content-wrapper {
-        height: auto;
-        overflow: visible;
-    }
+  .right-content-wrapper {
+    height: auto;
+    overflow: visible;
+  }
 
-    .right-content {
-        overflow: visible;
-        height: auto;
-    }
+  .right-content {
+    overflow: visible;
+    height: auto;
+  }
 
-    /* Fix overlays for scrolling page */
-    #result-wrapper,
-    #llm-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-    }
+  /* Fix overlays for scrolling page */
+  #result-wrapper,
+  #llm-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+  }
 
-    /* Adjust title input for smaller screens */
-    #Page #title {
-        grid-template-columns: auto 1fr;
-        /* Keep as is, but maybe adjust padding */
-    }
-
+  /* Adjust title input for smaller screens */
+  #Page #title {
+    grid-template-columns: auto 1fr;
+    /* Keep as is, but maybe adjust padding */
+  }
 }
 
 @media (max-width: 1240px) {
-    .right-header {
-        justify-content: space-between;
-    }
+  .right-header {
+    justify-content: space-between;
+  }
 
-    .right-header button {
-        flex: 1 1 auto;
-        justify-content: center;
-    }
+  .right-header button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
 }
 
 .footer {
-    grid-column: 1 / -1;
-    text-align: center;
-    font-size: 0.8em;
-    color: var(--fg-dark);
-    opacity: 0.7;
-    padding-top: 0.5em;
-    border-top: 1px solid var(--border);
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--fg-dark);
+  opacity: 0.7;
+  padding-top: 0.5em;
+  border-top: 1px solid var(--border);
 }
 
 input::placeholder,
 textarea::placeholder {
-    color: var(--fg-dark);
-    opacity: 0.5;
+  color: var(--fg-dark);
+  opacity: 0.5;
 }
 
 /* Inline Result Styles - Mirrored from #result */
 #inline-result {
-    text-align: start;
-    display: grid;
-    gap: 1.5em;
-    padding: 2em;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    place-content: start;
-    background: var(--panel-bg);
-    /* backdrop-filter: blur(10px); - Optional for inline, but keeping for consistency if needed, though it might not show over anything */
-    margin-top: 1em;
-    margin-bottom: 2em;
+  text-align: start;
+  display: grid;
+  gap: 1.5em;
+  padding: 2em;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  place-content: start;
+  background: var(--panel-bg);
+  /* backdrop-filter: blur(10px); - Optional for inline, but keeping for consistency if needed, though it might not show over anything */
+  margin-top: 1em;
+  margin-bottom: 2em;
 }
 
 .inline-result-content {
-    /* No specific styles needed for the wrapper if we style the p tags directly or let grid handle it */
-    display: contents;
-    /* Let children participate in the grid */
+  /* No specific styles needed for the wrapper if we style the p tags directly or let grid handle it */
+  display: contents;
+  /* Let children participate in the grid */
 }
 
 #inline-result p {
-    width: 100%;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    line-height: 1.6;
-    color: var(--fg);
-    margin: 0;
-    /* Reset default p margin */
+  width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: var(--fg);
+  margin: 0;
+  /* Reset default p margin */
 }
